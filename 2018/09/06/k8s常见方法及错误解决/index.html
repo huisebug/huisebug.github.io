@@ -1,0 +1,381 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>持续更新-20190306-k8s常见方法及错误解决 | </title><meta name="keywords" content="docker,k8s,prometheus"><meta name="author" content="huisebug"><meta name="copyright" content="huisebug"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="k8s常见方法及错误解决方法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="持续更新-20190306-k8s常见方法及错误解决">
+<meta property="og:url" content="https://huisebug.github.io/2018/09/06/k8s%E5%B8%B8%E8%A7%81%E6%96%B9%E6%B3%95%E5%8F%8A%E9%94%99%E8%AF%AF%E8%A7%A3%E5%86%B3/index.html">
+<meta property="og:site_name">
+<meta property="og:description" content="k8s常见方法及错误解决方法">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://huisebug.github.io/img/linuxqie.jpg">
+<meta property="article:published_time" content="2018-09-06T08:48:27.000Z">
+<meta property="article:modified_time" content="2021-07-07T06:38:20.148Z">
+<meta property="article:author" content="huisebug">
+<meta property="article:tag" content="docker">
+<meta property="article:tag" content="k8s">
+<meta property="article:tag" content="prometheus">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://huisebug.github.io/img/linuxqie.jpg"><link rel="shortcut icon" href="/img/linuxqie.jpg"><link rel="canonical" href="https://huisebug.github.io/2018/09/06/k8s%E5%B8%B8%E8%A7%81%E6%96%B9%E6%B3%95%E5%8F%8A%E9%94%99%E8%AF%AF%E8%A7%A3%E5%86%B3/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '持续更新-20190306-k8s常见方法及错误解决',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-07-07 14:38:20'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/linuxqie.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">15</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">46</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/download/"><i class="fa-fw fas fa-folder-open"></i><span> download</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/linuxqie.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/"></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/download/"><i class="fa-fw fas fa-folder-open"></i><span> download</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">持续更新-20190306-k8s常见方法及错误解决</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2018-09-06T08:48:27.000Z" title="发表于 2018-09-06 16:48:27">2018-09-06</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-07-07T06:38:20.148Z" title="更新于 2021-07-07 14:38:20">2021-07-07</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Kubernetes/">Kubernetes</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="持续更新-20190306-k8s常见方法及错误解决"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>k8s常见方法及错误解决方法</p>
+<span id="more"></span>
+
+<h1 id="如果kubectl-get-nodes状态为notready"><a href="#如果kubectl-get-nodes状态为notready" class="headerlink" title="如果kubectl get nodes状态为notready"></a>如果kubectl get nodes状态为notready</h1><p>可以查看kubelet服务是否开启</p>
+<h1 id="容器之间使用flanneld通信，可以ping通docker0，容器之间无法ping通的时候"><a href="#容器之间使用flanneld通信，可以ping通docker0，容器之间无法ping通的时候" class="headerlink" title="容器之间使用flanneld通信，可以ping通docker0，容器之间无法ping通的时候"></a>容器之间使用flanneld通信，可以ping通docker0，容器之间无法ping通的时候</h1><p>iptables -F<br>iptables -X<br>iptables -Z<br>iptables -P INPUT ACCEPT<br>iptables -P OUTPUT ACCEPT<br>iptables -P FORWARD ACCEPT</p>
+<p>运行iptables关闭</p>
+<h1 id="system-anonymous”-cannot-proxy-services-in-the-namespace-“kube-system"><a href="#system-anonymous”-cannot-proxy-services-in-the-namespace-“kube-system" class="headerlink" title="system:anonymous” cannot proxy services in the namespace “kube-system"></a>system:anonymous” cannot proxy services in the namespace “kube-system</h1><p>浏览器访问 URL：</p>
+<p><a target="_blank" rel="noopener" href="https://192.168.100.80:6443/api/v1/proxy/namespaces/kube-system/services/kubernetes-dashboard">https://192.168.100.80:6443/api/v1/proxy/namespaces/kube-system/services/kubernetes-dashboard</a>（浏览器会提示证书验证，因为通过加密通道，以改⽅式访问的话，需要提前导⼊证书到你的计算机中）。不然会提示User<br>“system:anonymous” cannot proxy services in the namespace “kube-system”.</p>
+<p>导⼊证书</p>
+<p>将⽣成的admin.pem证书转换格式（/etc/kubernetes/ssl目录下）</p>
+<p>openssl pkcs12 -export -in admin.pem -out admin.p12 -inkey admin-key.pem</p>
+<p>将⽣成的 admin.p12<br>证书导⼊的你的电脑的浏览器，导出的时候记住你设置的密码，导⼊的时候还要⽤到</p>
+<h1 id="拉取国外镜像方法"><a href="#拉取国外镜像方法" class="headerlink" title="拉取国外镜像方法"></a>拉取国外镜像方法</h1><p>首先你要有GitHub和dockerhub的账号，将两个进行关联，关联请百度</p>
+<p>Docker 新建仓库关联github，这里是关联后的显示了我的github下有这四个项目</p>
+<p><img src="/2018/09/06/k8s%E5%B8%B8%E8%A7%81%E6%96%B9%E6%B3%95%E5%8F%8A%E9%94%99%E8%AF%AF%E8%A7%A3%E5%86%B3/media/102f9d9e8f071e8e0005e0dde3170ca7.png"></p>
+<p>然后选择一个进行关联，在进行创建</p>
+<p><img src="/2018/09/06/k8s%E5%B8%B8%E8%A7%81%E6%96%B9%E6%B3%95%E5%8F%8A%E9%94%99%E8%AF%AF%E8%A7%A3%E5%86%B3/media/7f156f9f3b8921e76230cc6e2927d504.png"></p>
+<p>然后在关联的github下建立一个Dockerfile</p>
+<p><img src="/2018/09/06/k8s%E5%B8%B8%E8%A7%81%E6%96%B9%E6%B3%95%E5%8F%8A%E9%94%99%E8%AF%AF%E8%A7%A3%E5%86%B3/media/333495aea16857eaaf52ddf42866438b.png"></p>
+<p>Dockerfile的内容就写一个你要拉取的国外镜像</p>
+<p><img src="/2018/09/06/k8s%E5%B8%B8%E8%A7%81%E6%96%B9%E6%B3%95%E5%8F%8A%E9%94%99%E8%AF%AF%E8%A7%A3%E5%86%B3/media/b165ca3332616bcb3d6b36527c87ddbd.png"></p>
+<p>这样就会关联过来一个，我这里只是举例，关联的并不是jenkin那个github项目</p>
+<p><img src="/2018/09/06/k8s%E5%B8%B8%E8%A7%81%E6%96%B9%E6%B3%95%E5%8F%8A%E9%94%99%E8%AF%AF%E8%A7%A3%E5%86%B3/media/7fd49d0468f4c664d8c50fbc1115c0d4.png"></p>
+<p>设置构建操作，点击那个trigger按键即可开始根据Dockerfile内容构建</p>
+<p><img src="/2018/09/06/k8s%E5%B8%B8%E8%A7%81%E6%96%B9%E6%B3%95%E5%8F%8A%E9%94%99%E8%AF%AF%E8%A7%A3%E5%86%B3/media/2d9c0fc642bd39da68847d819ee9c3d1.png"></p>
+<p>查看构建状态</p>
+<p><img src="/2018/09/06/k8s%E5%B8%B8%E8%A7%81%E6%96%B9%E6%B3%95%E5%8F%8A%E9%94%99%E8%AF%AF%E8%A7%A3%E5%86%B3/media/89fb0fae28a9610ff15d215e0a9bd4cd.png"></p>
+<p>然后即可看到成功构建这个镜像了，你只需要pull到你本地，然后tag改下名字就是了，原理就是国内没法pull镜像，我们就利用dockerhub可以访问国外镜像来帮我们拉取，我们再从dockerhub去拉取</p>
+<p><img src="/2018/09/06/k8s%E5%B8%B8%E8%A7%81%E6%96%B9%E6%B3%95%E5%8F%8A%E9%94%99%E8%AF%AF%E8%A7%A3%E5%86%B3/media/4eeb4bbaae00073c3858d4f295ceb719.png"></p>
+<h1 id="Error-‘dial-tcp-172-30-13-5-9090-getsockopt-no-route-to-host’"><a href="#Error-‘dial-tcp-172-30-13-5-9090-getsockopt-no-route-to-host’" class="headerlink" title="Error: ‘dial tcp 172.30.13.5:9090: getsockopt: no route to host’"></a>Error: ‘dial tcp 172.30.13.5:9090: getsockopt: no route to host’</h1><p>Trying to reach: ‘<a target="_blank" rel="noopener" href="http://172.30.13.5:9090/&#39;">http://172.30.13.5:9090/&#39;</a></p>
+<ul>
+<li><p>  flanneld服务停止了；</p>
+</li>
+<li><p>  flanneld服务运行正常，在排查iptables防火墙</p>
+</li>
+</ul>
+<p>iptables -F</p>
+<p>iptables -X</p>
+<p>iptables -Z</p>
+<p>iptables -P INPUT ACCEPT</p>
+<p>iptables -P OUTPUT ACCEPT</p>
+<p>iptables -P FORWARD ACCEPT</p>
+<p>iptables-save &gt; /etc/iptables.rules</p>
+<ul>
+<li><p>  或者是否是具体服务的pod ip变了；</p>
+</li>
+<li><p>  检查master和node是否都有安装flanneld服务</p>
+</li>
+</ul>
+<h1 id="集群ip无法访问，节点可以访问"><a href="#集群ip无法访问，节点可以访问" class="headerlink" title="集群ip无法访问，节点可以访问"></a>集群ip无法访问，节点可以访问</h1><p>集群ip是提供给集群访问的，比如你的master节点只是安装了api，controller，scheduler，并未安装kubelet和kube-proxy他是不能使用集群ip进行测试访问服务的</p>
+<h1 id="未解决-device-or-resource-busy"><a href="#未解决-device-or-resource-busy" class="headerlink" title="未解决*device or resource busy"></a>未解决*device or resource busy</h1><p>FailedMount MountVolume.SetUp failed for volume<br>“kubernetes.io/configmap/fc973baa-6d50-11e8-8999-000c296e73e7-influxdb-config”<br>(spec.Name: “influxdb-config”) pod “fc973baa-6d50-11e8-8999-000c296e73e7” (UID:<br>“fc973baa-6d50-11e8-8999-000c296e73e7”) with: remove<br>/var/lib/kubelet/pods/fc973baa-6d50-11e8-8999-000c296e73e7/volumes/kubernetes.io~configmap/influxdb-config/resolv.conf:<br>device or resource busy</p>
+<h1 id="kibana报错Request-Timeout-after-30000ms"><a href="#kibana报错Request-Timeout-after-30000ms" class="headerlink" title="kibana报错Request Timeout after 30000ms"></a>kibana报错Request Timeout after 30000ms</h1><p>加大elasticsearch内存。Node节点内存不足</p>
+<p>或者修改kibana的检测时间</p>
+<p>sed -i ‘/# elasticsearch.requestTimeout:<br>30000/a\\elasticsearch.requestTimeout: 100000’ /kibana/config/kibana.yml</p>
+<p>我的最无语的是：</p>
+<p>配置的kube-dns因为iptables防火墙的原因被堵塞了。导致无法解析ip地址。</p>
+<h1 id="Unable-to-connect-to-Elasticsearch-at-http-elasticsearch-logging-9200"><a href="#Unable-to-connect-to-Elasticsearch-at-http-elasticsearch-logging-9200" class="headerlink" title="Unable to connect to Elasticsearch at http://elasticsearch-logging:9200."></a>Unable to connect to Elasticsearch at <a target="_blank" rel="noopener" href="http://elasticsearch-logging:9200/">http://elasticsearch-logging:9200</a>.</h1><p>因为我的 elasticsearch镜像建立错了，导致 elasticsearch实际没有运行</p>
+<h1 id="pod处于pending状态"><a href="#pod处于pending状态" class="headerlink" title="pod处于pending状态"></a>pod处于pending状态</h1><p>如果master节点运⾏的是kuberentes1.1.或更⾼版本，⽽node节点的版本低于1.1版本，则API<br>server将也可以接受新的特权模式的pod，但是⽆法启动，pod将处于pending状态。</p>
+<p>执⾏ kubectl describe pod FooPodName<br>，可以看到为什么pod处于pending状态。输出的event列表中将显示：</p>
+<p>Error validating pod”FooPodName”.”FooPodNamespace” from api,<br>ignoring:spec.containers[0].securityContext.privileged: forbidden<br>‘&lt;*&gt;(0xc2089d3248)true’</p>
+<p>如果master节点的版本低于1.1，⽆法创建特权模式的pod。如果你仍然试图去创建的话，你得到如下错误：</p>
+<p>The Pod “FooPodName” is invalid.spec.containers[0].securityContext.privileged:<br>forbidden ‘&lt;*&gt;(0xc20b222db0)true’</p>
+<h1 id="K8s共用仓库私有项目认证账户"><a href="#K8s共用仓库私有项目认证账户" class="headerlink" title="K8s共用仓库私有项目认证账户"></a>K8s共用仓库私有项目认证账户</h1><p>kubernetes.io/dockerconfigjson</p>
+<p>可以直接用 kubectl 命令来创建用于docker registry认证的secret：</p>
+<p>$ kubectl create secret docker-registry myregistrykey \</p>
+<p>--docker-server=DOCKER_REGISTRY_SERVER \</p>
+<p>--docker-username=DOCKER_USER –docker-password=DOCKER_PASSWORD \</p>
+<p>--docker-email=DOCKER_EMAIL</p>
+<p>secret “myregistrykey” created.</p>
+<p>这种方式需要你已经定义上述的环境变量，如果没有定义，则无法获取变量值，会失败。</p>
+<p>也可以直接读取 ~/.docker/config.json 的内容来创建：</p>
+<p>可以查看到你的docker服务已经存储的仓库认证信息</p>
+<p>$ cat ~/.docker/config.json</p>
+<p>进行base64编码格式加密转换</p>
+<p>$ cat ~/.docker/config.json | base64</p>
+<p>也可将显示的密文使用解密进行查看</p>
+<p>echo “你的密文” | base64 –decode</p>
+<p>$ vim myregistrykey.yaml</p>
+<p>apiVersion: v1</p>
+<p>kind: Secret</p>
+<p>metadata:</p>
+<p>name: myregistrykey</p>
+<p>data:</p>
+<p>.dockerconfigjson: 密文是连续的，不能分开</p>
+<p>type: kubernetes.io/dockerconfigjson</p>
+<p>$ kubectl create -f myregistrykey.yaml</p>
+<p>建立一个pod；来测试，我这里是测试拉取本地的仓库中私有项目的image，这里就需要用到认证</p>
+<p>vim testreg.yaml</p>
+<p>apiVersion: v1</p>
+<p>kind: Pod</p>
+<p>metadata:</p>
+<p>name: testreg</p>
+<p>spec:</p>
+<p>containers:</p>
+<p>- name: foo</p>
+<p>image: 172.16.3.55:8000/kubernetes/kibana:v4.6.1-1</p>
+<p>imagePullSecrets:</p>
+<p>- name: myregistrykey</p>
+<p>~</p>
+<h1 id="Influxdb数据库web无法访问"><a href="#Influxdb数据库web无法访问" class="headerlink" title="Influxdb数据库web无法访问"></a>Influxdb数据库web无法访问</h1><p>0 error - Could not connect to <a target="_blank" rel="noopener" href="http://172.30.32.2:8086/">http://172.30.32.2:8086</a></p>
+<p>Hint: the InfluxDB API runs on port 8086 by default</p>
+<p>当使用http方式访问的时间输入node ip：映射的端口即可访问，使用https方式就不行</p>
+<h1 id="Secret-configmap更新后pod中以环境变量的值并没跟着更新"><a href="#Secret-configmap更新后pod中以环境变量的值并没跟着更新" class="headerlink" title="Secret/configmap更新后pod中以环境变量的值并没跟着更新 "></a>Secret/configmap更新后pod中以环境变量的值并没跟着更新 </h1><p>secret挂载到里面去使用的是挂载方式的支持自动更新的，使用环境变量方式的是不支持自动更新的</p>
+<h1 id="K8s中同一个namespace中的所有pod使用私有docker-registry的认证信息"><a href="#K8s中同一个namespace中的所有pod使用私有docker-registry的认证信息" class="headerlink" title="K8s中同一个namespace中的所有pod使用私有docker registry的认证信息"></a>K8s中同一个namespace中的所有pod使用私有docker registry的认证信息</h1><p>$ cat ~/.docker/config.json</p>
+<p>进行base64编码格式加密转换</p>
+<p>$ cat ~/.docker/config.json | base64</p>
+<p>也可将显示的密文使用解密进行查看</p>
+<p>echo “你的密文” | base64 –decode</p>
+<p>$ vim myregistrykey.yaml</p>
+<p>apiVersion: v1</p>
+<p>kind: Secret</p>
+<p>metadata:</p>
+<p>name: myregistrykey</p>
+<p>data:</p>
+<p>.dockerconfigjson: 密文是连续的，不能分开</p>
+<p>type: kubernetes.io/dockerconfigjson</p>
+<p>$ kubectl create -f myregistrykey.yaml</p>
+<p>1.命令方式</p>
+<p>建立好后，在ServiceAccount中新增imagePullSecrets<br>的Secret为myregistrykey（这里使用的是ServiceAccount名为default的。）</p>
+<p>kubectl patch serviceaccount default -p ‘{“imagePullSecrets”: [{“name”:<br>“myregistrykey”}]}’</p>
+<p>2.yaml文件方式</p>
+<p>$ kubectl get serviceaccounts default -o yaml &gt; ./sa.yaml</p>
+<p>$ cat sa.yaml</p>
+<p>apiVersion: v1</p>
+<p>kind: ServiceAccount</p>
+<p>metadata:</p>
+<p>creationTimestamp: 2015-08-07T22:02:39Z</p>
+<p>name: default</p>
+<p>namespace: default</p>
+<p>resourceVersion: “243024”</p>
+<p>selfLink: /api/v1/namespaces/default/serviceaccounts/default</p>
+<p>uid: 052fb0f4-3d50-11e5-b066-42010af0d7b6</p>
+<p>secrets:</p>
+<p>- name: default-token-uudge</p>
+<p>$ vi sa.yaml（这里是新增和删除的部分）</p>
+<p>[editor session not shown]</p>
+<p>[delete line with key “resourceVersion”]</p>
+<p>[add lines with “imagePullSecret:”]</p>
+<p>$ cat sa.yaml</p>
+<p>apiVersion: v1</p>
+<p>kind: ServiceAccount</p>
+<p>metadata:</p>
+<p>creationTimestamp: 2015-08-07T22:02:39Z</p>
+<p>name: default</p>
+<p>namespace: default</p>
+<p>selfLink: /api/v1/namespaces/default/serviceaccounts/default</p>
+<p>uid: 052fb0f4-3d50-11e5-b066-42010af0d7b6</p>
+<p>secrets:</p>
+<p>- name: default-token-uudge</p>
+<p>imagePullSecrets:</p>
+<p>- name: myregistrykey</p>
+<p>$ kubectl replace serviceaccount default -f ./sa.yaml</p>
+<p>新建的ServiceAccount会默认使用secret的token</p>
+<p>每个namespace都有一个默认的serviceaccount（default）</p>
+<h1 id="uid-unable-to-do-port-forwarding-socat-not-found"><a href="#uid-unable-to-do-port-forwarding-socat-not-found" class="headerlink" title="uid : unable to do port forwarding: socat not found"></a>uid : unable to do port forwarding: socat not found</h1><p>Kubectl port-forward实现使用localhost_ip访问并且可以进行pod调度</p>
+<p>在节点上需要安装socat</p>
+<p>yum –y install socat</p>
+<h1 id="flannel不能随意重启，因为会导致每个节点从etcd获取的网段不同。"><a href="#flannel不能随意重启，因为会导致每个节点从etcd获取的网段不同。" class="headerlink" title="flannel不能随意重启，因为会导致每个节点从etcd获取的网段不同。"></a>flannel不能随意重启，因为会导致每个节点从etcd获取的网段不同。</h1><h1 id="Flanneld维护整个容器"><a href="#Flanneld维护整个容器" class="headerlink" title="Flanneld维护整个容器"></a>Flanneld维护整个容器</h1><p>Flanneld是容器的路由表，所以就算是你使用了nodeip加上映射后的端口访问也是要经过flannel的，当关闭flannel的时候，docker也关闭了，这是因为在flannel.service服务文件中定义的。</p>
+<h1 id="Ingree的path加了后提示404找不到"><a href="#Ingree的path加了后提示404找不到" class="headerlink" title="Ingree的path加了后提示404找不到"></a>Ingree的path加了后提示404找不到</h1><p>-path的路径会带入后端服务中，比如:</p>
+<p>Nginx容器的根目录为/usr/share/nginx/html/</p>
+<p>而我的ingree定义是这样的</p>
+<p>- path: /nginx</p>
+<p>backend:</p>
+<p>serviceName: my-nginx</p>
+<p>servicePort: web</p>
+<p>那么我需要在nginx容器的根目录下新建一个nginx文件夹</p>
+<p>mkdir –p /usr/share/nginx/html/nginx 然后将网页放在这里，不然会提示找不到404</p>
+<h1 id="treafik的web显示"><a href="#treafik的web显示" class="headerlink" title="treafik的web显示"></a>treafik的web显示</h1><p>是以一个kind：ingree的yaml文件中第一个出现的host作为前端名FRONTENDS显示，这样其实不够严谨，没法区分前后端。</p>
+<h1 id="PodExceedsFreeMemory"><a href="#PodExceedsFreeMemory" class="headerlink" title="PodExceedsFreeMemory"></a>PodExceedsFreeMemory</h1><p>Node内存不足，无法调度</p>
+<h1 id="Error-from-server-ServerTimeout"><a href="#Error-from-server-ServerTimeout" class="headerlink" title="Error from server (ServerTimeout)"></a>Error from server (ServerTimeout)</h1><p>重启apiserver服务</p>
+<h1 id="解决heapster无法连接报错"><a href="#解决heapster无法连接报错" class="headerlink" title="解决heapster无法连接报错"></a>解决heapster无法连接报错</h1><p>E1101 08:56:05.014891 1 summary.go:97] error while getting metrics summary from<br>Kubelet kube-node2(192.168.100.82:10255): Get<br><a target="_blank" rel="noopener" href="http://192.168.100.82:10255/stats/summary/">http://192.168.100.82:10255/stats/summary/</a>: dial tcp 192.168.100.82:10255:<br>getsockopt: connection refused</p>
+<p>第一种方式</p>
+<p>参考<a target="_blank" rel="noopener" href="https://github.com/kubernetes/heapster/issues/1586">https://github.com/kubernetes/heapster/issues/1586</a></p>
+<p>是不是覆盖网络的问题，优化calico网络组件</p>
+<p>第二种方式，可以成功运行</p>
+<p>因为默认10250端口号是kubelet的只读端口，版本高以后默认是关闭的，首先确认kubelet服务是否正常运行</p>
+<p>[root@kube-node1 ~]# netstat -lntp | grep kubelet</p>
+<p>tcp 0 0 127.0.0.1:10248 0.0.0.0:* LISTEN 74042/kubelet</p>
+<p>tcp 0 0 127.0.0.1:43411 0.0.0.0:* LISTEN 74042/kubelet</p>
+<p>tcp6 0 0 :::10250 :::* LISTEN 74042/kubelet</p>
+<p>明显看到上面没有运行10255端口，这时我们修改kubelet的配置文件，从哪里获取配置文件位置呢？</p>
+<p>使用命令systemctl status kubelet<br>-l可以获取kubelet启动加了哪些参数，列如我这里就获取到是</p>
+<p><img src="/2018/09/06/k8s%E5%B8%B8%E8%A7%81%E6%96%B9%E6%B3%95%E5%8F%8A%E9%94%99%E8%AF%AF%E8%A7%A3%E5%86%B3/media/4b9059dffedd9cb794516242677fece8.png"></p>
+<p>编辑配置文件，看其中是否有下面的配置，没有就新加，为了方面查看就加到port的下面，然后重启服务就可以查看到10255端口启用了。所有的node都需要修改</p>
+<p><img src="/2018/09/06/k8s%E5%B8%B8%E8%A7%81%E6%96%B9%E6%B3%95%E5%8F%8A%E9%94%99%E8%AF%AF%E8%A7%A3%E5%86%B3/media/a5d326f388de176af47e36eb8825cdab.png"></p>
+<p>readOnlyPort: 10255</p>
+<p>第三种方式</p>
+<p>修改heapster的启动参数 -<br>–source=kubernetes:<a target="_blank" rel="noopener" href="https://kubernetes.default/?kubeletHttps=true&amp;kubeletPort=10250">https://kubernetes.default?kubeletHttps=true&amp;kubeletPort=10250</a></p>
+<p>提示下面的错误</p>
+<p>E1101 09:17:05.022691 1 kubelet.go:231] error while getting containers from<br>Kubelet: failed to get all container stats from Kubelet URL<br>“<a target="_blank" rel="noopener" href="https://192.168.100.82:10250/stats/container/&quot;">https://192.168.100.82:10250/stats/container/&quot;</a>: Post<br><a target="_blank" rel="noopener" href="https://192.168.100.82:10250/stats/container/">https://192.168.100.82:10250/stats/container/</a>: x509: cannot validate certificate<br>for 192.168.100.82 because it doesn’t contain any IP SANs</p>
+<p>第四种方式</p>
+<p>-<br>–source=kubernetes:<a target="_blank" rel="noopener" href="https://kubernetes.default/?inClusterConfig=false&amp;useServiceAccount=true&amp;auth=">https://kubernetes.default?inClusterConfig=false&amp;useServiceAccount=true&amp;auth=</a></p>
+<p>提示下面的错误</p>
+<p>E1101 09:49:48.557497 1 reflector.go:190]<br>k8s.io/heapster/metrics/processors/namespace_based_enricher.go:84: Failed to<br>list *v1.Namespace: Get<br><a target="_blank" rel="noopener" href="https://kubernetes.default/api/v1/namespaces?resourceVersion=0">https://kubernetes.default/api/v1/namespaces?resourceVersion=0</a>: x509:<br>certificate signed by unknown authority</p>
+<p>E1101 09:49:48.558574 1 reflector.go:190]<br>k8s.io/heapster/metrics/heapster.go:322: Failed to list *v1.Pod: Get<br><a target="_blank" rel="noopener" href="https://kubernetes.default/api/v1/pods?resourceVersion=0">https://kubernetes.default/api/v1/pods?resourceVersion=0</a>: x509: certificate<br>signed by unknown authority</p>
+<p>E1101 09:49:48.592681 1 reflector.go:190]<br>k8s.io/heapster/metrics/util/util.go:51: Failed to list *v1.Node: Get<br><a target="_blank" rel="noopener" href="https://kubernetes.default/api/v1/nodes?resourceVersion=0">https://kubernetes.default/api/v1/nodes?resourceVersion=0</a>: x509: certificate<br>signed by unknown authority</p>
+<h1 id="Invalid-Kubernetes-API-v1-endpoint-https-10-254-0-1-443-api-SSL-connect-returned-1-errno-0-state-error-certificate-verify-failed"><a href="#Invalid-Kubernetes-API-v1-endpoint-https-10-254-0-1-443-api-SSL-connect-returned-1-errno-0-state-error-certificate-verify-failed" class="headerlink" title="Invalid Kubernetes API v1 endpoint https://10.254.0.1:443/api: SSL_connect returned=1 errno=0 state=error: certificate verify failed"></a>Invalid Kubernetes API v1 endpoint <a target="_blank" rel="noopener" href="https://10.254.0.1/api">https://10.254.0.1:443/api</a>: SSL_connect returned=1 errno=0 state=error: certificate verify failed</h1><p>docker run –rm -it –entrypoint=”cat” huisebug/fluentd-elasticsearch:1.22<br>/etc/td-agent/td-agent.conf &gt; td-agent.conf</p>
+<p>修改文件内容</p>
+<p>在td-agent.conf的配置文件的中增加两条配置配置：（注意是新加两条，不是新建）</p>
+<p>&lt;filter kubernetes.**&gt;</p>
+<p>type kubernetes_metadata</p>
+<p>kubernetes_url kubeapi地址:8080</p>
+<p>verify_ssl false</p>
+<p>&lt;/filter&gt;</p>
+<p>创建ConfigMap</p>
+<p>kubectl create configmap td-agent-config –from-file=./td-agent.conf -n<br>kube-system</p>
+<p>在fluend.yaml中新加configmap</p>
+<p>- name: td-agent-config</p>
+<p>mountPath: /etc/td-agent</p>
+<p>…</p>
+<p>volumes:</p>
+<p>- name: td-agent-config</p>
+<p>configMap:</p>
+<p>name: td-agent-config</p>
+<h1 id="efk提示open-var-run-secrets-kubernetes-io-serviceaccount-token-no-such-file-or-directory"><a href="#efk提示open-var-run-secrets-kubernetes-io-serviceaccount-token-no-such-file-or-directory" class="headerlink" title="efk提示open /var/run/secrets/kubernetes.io/serviceaccount/token: no such file or directory"></a>efk提示open /var/run/secrets/kubernetes.io/serviceaccount/token: no such file or directory</h1><p>efk的建立中e的建立确保你的k8s支持serviceaccout是否开启，不然会导致token没建立，/elasticsearch_logging_discovery无法访问API<br>Server导致 /elasticsearch/config/elasticsearch.yml没有被正确生成造成的，</p>
+<h1 id="Grafana在Pods仪表板不显示终止的pod"><a href="#Grafana在Pods仪表板不显示终止的pod" class="headerlink" title="Grafana在Pods仪表板不显示终止的pod"></a>Grafana在Pods仪表板不显示终止的pod</h1><p>默认的pod查询语句是这样的</p>
+<p>我们需要在influxdb中新建一个采样数据，然后将其指向采样数据，这样就会过滤掉失效的pod</p>
+<p>Influxdb建立时需要开启web UI默认访问端口是8083，</p>
+<p>我这里使用获取的svc经过nodeport方式后进行访问</p>
+<p>http://服务器ip:31899</p>
+<p>连接数据库中可能会提示找不到数据库，因为系统会有一个默认配置，如果你发现配置错误，比如我这里是服务器ip：31004，连接成功后即可show<br>database。</p>
+<p>然后在query栏执行以下两句influxdb sql</p>
+<p>CREATE RETENTION POLICY “2hours” ON “k8s” DURATION 2h REPLICATION 1</p>
+<p>CREATE CONTINUOUS QUERY current_pods_query ON k8s BEGIN SELECT max(value) AS<br>value INTO k8s.”2hours”.current_pods FROM k8s.”default”.uptime WHERE type =<br>‘pod’ GROUP BY time(5m), namespace_name, nodename, pod_name END</p>
+<p>执行完毕后切换回grafana配置界面，修改query语句</p>
+<p>SHOW TAG VALUES FROM k8s.”2hours”.current_pods WITH KEY = “pod_name” WHERE<br>“namespace_name” =~ /$namespace$/</p>
+<p>保存修改，一段时间后即可看到失效pod就没有了</p>
+<h1 id="pod-Spec-SecurityContext-RunAsUser-is-forbidden容器不调度"><a href="#pod-Spec-SecurityContext-RunAsUser-is-forbidden容器不调度" class="headerlink" title="pod.Spec.SecurityContext.RunAsUser is forbidden容器不调度"></a>pod.Spec.SecurityContext.RunAsUser is forbidden容器不调度</h1><p>是因为apiserver开启了SecurityConrextDeny，将其去除</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">huisebug</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://huisebug.github.io/2018/09/06/k8s%E5%B8%B8%E8%A7%81%E6%96%B9%E6%B3%95%E5%8F%8A%E9%94%99%E8%AF%AF%E8%A7%A3%E5%86%B3/">https://huisebug.github.io/2018/09/06/k8s常见方法及错误解决/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://huisebug.github.io" target="_blank"></a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/docker/">docker</a><a class="post-meta__tags" href="/tags/k8s/">k8s</a><a class="post-meta__tags" href="/tags/prometheus/">prometheus</a></div><div class="post_share"><div class="social-share" data-image="/img/linuxqie.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button button--animated"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/img/wechat.jpg" target="_blank"><img class="post-qr-code-img" src="/img/wechat.jpg" alt="wechat"/></a><div class="post-qr-code-desc">wechat</div></li><li class="reward-item"><a href="/img/alipay.jpg" target="_blank"><img class="post-qr-code-img" src="/img/alipay.jpg" alt="alipay"/></a><div class="post-qr-code-desc">alipay</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2019/03/06/prometheus/"><img class="prev-cover" src="/img/head.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">prometheus监控单一服务及告警</div></div></a></div><div class="next-post pull-right"><a href="/2017/12/19/docker-swarm/"><img class="next-cover" src="/img/linuxqie.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Docker-machine+Docker swarm+Nginx+Nginx代理</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/07/06/kata容器的一些分享/" title="kata容器的一些分享"><img class="cover" src="/img/kata.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-07-06</div><div class="title">kata容器的一些分享</div></div></a></div><div><a href="/2020/12/15/prometheus-operator告警场景/" title="Prometheus-Operator告警场景"><img class="cover" src="/img/linuxqie.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-15</div><div class="title">Prometheus-Operator告警场景</div></div></a></div><div><a href="/2019/08/27/Prometheus-Operator/" title="Prometheus-Operator监控k8s"><img class="cover" src="/img/head.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-08-27</div><div class="title">Prometheus-Operator监控k8s</div></div></a></div><div><a href="/2017/12/19/docker-basic/" title="docker基础命令"><img class="cover" src="/img/linuxqie.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-12-19</div><div class="title">docker基础命令</div></div></a></div><div><a href="/2019/05/24/mysql-mycat/" title="mysql5.7主从复制及mycat1.6读写分离"><img class="cover" src="/img/head.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-05-24</div><div class="title">mysql5.7主从复制及mycat1.6读写分离</div></div></a></div><div><a href="/2017/12/19/docker-swarm/" title="Docker-machine+Docker swarm+Nginx+Nginx代理"><img class="cover" src="/img/linuxqie.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-12-19</div><div class="title">Docker-machine+Docker swarm+Nginx+Nginx代理</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/linuxqie.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">huisebug</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">15</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">46</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/huisebug" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:huisebug@outlook.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">记录容器生活</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A6%82%E6%9E%9Ckubectl-get-nodes%E7%8A%B6%E6%80%81%E4%B8%BAnotready"><span class="toc-number">1.</span> <span class="toc-text">如果kubectl get nodes状态为notready</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%B9%E5%99%A8%E4%B9%8B%E9%97%B4%E4%BD%BF%E7%94%A8flanneld%E9%80%9A%E4%BF%A1%EF%BC%8C%E5%8F%AF%E4%BB%A5ping%E9%80%9Adocker0%EF%BC%8C%E5%AE%B9%E5%99%A8%E4%B9%8B%E9%97%B4%E6%97%A0%E6%B3%95ping%E9%80%9A%E7%9A%84%E6%97%B6%E5%80%99"><span class="toc-number">2.</span> <span class="toc-text">容器之间使用flanneld通信，可以ping通docker0，容器之间无法ping通的时候</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#system-anonymous%E2%80%9D-cannot-proxy-services-in-the-namespace-%E2%80%9Ckube-system"><span class="toc-number">3.</span> <span class="toc-text">system:anonymous” cannot proxy services in the namespace “kube-system</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8B%89%E5%8F%96%E5%9B%BD%E5%A4%96%E9%95%9C%E5%83%8F%E6%96%B9%E6%B3%95"><span class="toc-number">4.</span> <span class="toc-text">拉取国外镜像方法</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Error-%E2%80%98dial-tcp-172-30-13-5-9090-getsockopt-no-route-to-host%E2%80%99"><span class="toc-number">5.</span> <span class="toc-text">Error: ‘dial tcp 172.30.13.5:9090: getsockopt: no route to host’</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%9B%86%E7%BE%A4ip%E6%97%A0%E6%B3%95%E8%AE%BF%E9%97%AE%EF%BC%8C%E8%8A%82%E7%82%B9%E5%8F%AF%E4%BB%A5%E8%AE%BF%E9%97%AE"><span class="toc-number">6.</span> <span class="toc-text">集群ip无法访问，节点可以访问</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%AA%E8%A7%A3%E5%86%B3-device-or-resource-busy"><span class="toc-number">7.</span> <span class="toc-text">未解决*device or resource busy</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kibana%E6%8A%A5%E9%94%99Request-Timeout-after-30000ms"><span class="toc-number">8.</span> <span class="toc-text">kibana报错Request Timeout after 30000ms</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Unable-to-connect-to-Elasticsearch-at-http-elasticsearch-logging-9200"><span class="toc-number">9.</span> <span class="toc-text">Unable to connect to Elasticsearch at http:&#x2F;&#x2F;elasticsearch-logging:9200.</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#pod%E5%A4%84%E4%BA%8Epending%E7%8A%B6%E6%80%81"><span class="toc-number">10.</span> <span class="toc-text">pod处于pending状态</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#K8s%E5%85%B1%E7%94%A8%E4%BB%93%E5%BA%93%E7%A7%81%E6%9C%89%E9%A1%B9%E7%9B%AE%E8%AE%A4%E8%AF%81%E8%B4%A6%E6%88%B7"><span class="toc-number">11.</span> <span class="toc-text">K8s共用仓库私有项目认证账户</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Influxdb%E6%95%B0%E6%8D%AE%E5%BA%93web%E6%97%A0%E6%B3%95%E8%AE%BF%E9%97%AE"><span class="toc-number">12.</span> <span class="toc-text">Influxdb数据库web无法访问</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Secret-configmap%E6%9B%B4%E6%96%B0%E5%90%8Epod%E4%B8%AD%E4%BB%A5%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E7%9A%84%E5%80%BC%E5%B9%B6%E6%B2%A1%E8%B7%9F%E7%9D%80%E6%9B%B4%E6%96%B0"><span class="toc-number">13.</span> <span class="toc-text">Secret&#x2F;configmap更新后pod中以环境变量的值并没跟着更新 </span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#K8s%E4%B8%AD%E5%90%8C%E4%B8%80%E4%B8%AAnamespace%E4%B8%AD%E7%9A%84%E6%89%80%E6%9C%89pod%E4%BD%BF%E7%94%A8%E7%A7%81%E6%9C%89docker-registry%E7%9A%84%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF"><span class="toc-number">14.</span> <span class="toc-text">K8s中同一个namespace中的所有pod使用私有docker registry的认证信息</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#uid-unable-to-do-port-forwarding-socat-not-found"><span class="toc-number">15.</span> <span class="toc-text">uid : unable to do port forwarding: socat not found</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#flannel%E4%B8%8D%E8%83%BD%E9%9A%8F%E6%84%8F%E9%87%8D%E5%90%AF%EF%BC%8C%E5%9B%A0%E4%B8%BA%E4%BC%9A%E5%AF%BC%E8%87%B4%E6%AF%8F%E4%B8%AA%E8%8A%82%E7%82%B9%E4%BB%8Eetcd%E8%8E%B7%E5%8F%96%E7%9A%84%E7%BD%91%E6%AE%B5%E4%B8%8D%E5%90%8C%E3%80%82"><span class="toc-number">16.</span> <span class="toc-text">flannel不能随意重启，因为会导致每个节点从etcd获取的网段不同。</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Flanneld%E7%BB%B4%E6%8A%A4%E6%95%B4%E4%B8%AA%E5%AE%B9%E5%99%A8"><span class="toc-number">17.</span> <span class="toc-text">Flanneld维护整个容器</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Ingree%E7%9A%84path%E5%8A%A0%E4%BA%86%E5%90%8E%E6%8F%90%E7%A4%BA404%E6%89%BE%E4%B8%8D%E5%88%B0"><span class="toc-number">18.</span> <span class="toc-text">Ingree的path加了后提示404找不到</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#treafik%E7%9A%84web%E6%98%BE%E7%A4%BA"><span class="toc-number">19.</span> <span class="toc-text">treafik的web显示</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#PodExceedsFreeMemory"><span class="toc-number">20.</span> <span class="toc-text">PodExceedsFreeMemory</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Error-from-server-ServerTimeout"><span class="toc-number">21.</span> <span class="toc-text">Error from server (ServerTimeout)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3heapster%E6%97%A0%E6%B3%95%E8%BF%9E%E6%8E%A5%E6%8A%A5%E9%94%99"><span class="toc-number">22.</span> <span class="toc-text">解决heapster无法连接报错</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Invalid-Kubernetes-API-v1-endpoint-https-10-254-0-1-443-api-SSL-connect-returned-1-errno-0-state-error-certificate-verify-failed"><span class="toc-number">23.</span> <span class="toc-text">Invalid Kubernetes API v1 endpoint https:&#x2F;&#x2F;10.254.0.1:443&#x2F;api: SSL_connect returned&#x3D;1 errno&#x3D;0 state&#x3D;error: certificate verify failed</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#efk%E6%8F%90%E7%A4%BAopen-var-run-secrets-kubernetes-io-serviceaccount-token-no-such-file-or-directory"><span class="toc-number">24.</span> <span class="toc-text">efk提示open &#x2F;var&#x2F;run&#x2F;secrets&#x2F;kubernetes.io&#x2F;serviceaccount&#x2F;token: no such file or directory</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Grafana%E5%9C%A8Pods%E4%BB%AA%E8%A1%A8%E6%9D%BF%E4%B8%8D%E6%98%BE%E7%A4%BA%E7%BB%88%E6%AD%A2%E7%9A%84pod"><span class="toc-number">25.</span> <span class="toc-text">Grafana在Pods仪表板不显示终止的pod</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#pod-Spec-SecurityContext-RunAsUser-is-forbidden%E5%AE%B9%E5%99%A8%E4%B8%8D%E8%B0%83%E5%BA%A6"><span class="toc-number">26.</span> <span class="toc-text">pod.Spec.SecurityContext.RunAsUser is forbidden容器不调度</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/07/06/kata%E5%AE%B9%E5%99%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E5%88%86%E4%BA%AB/" title="kata容器的一些分享"><img src="/img/kata.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="kata容器的一些分享"/></a><div class="content"><a class="title" href="/2021/07/06/kata%E5%AE%B9%E5%99%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E5%88%86%E4%BA%AB/" title="kata容器的一些分享">kata容器的一些分享</a><time datetime="2021-07-06T06:04:01.000Z" title="发表于 2021-07-06 14:04:01">2021-07-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/12/15/k8s%E9%AB%98%E7%89%88%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2yaml/" title="k8s集群高版本1.18以上常见服务部署yaml"><img src="/img/linuxqie.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="k8s集群高版本1.18以上常见服务部署yaml"/></a><div class="content"><a class="title" href="/2020/12/15/k8s%E9%AB%98%E7%89%88%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2yaml/" title="k8s集群高版本1.18以上常见服务部署yaml">k8s集群高版本1.18以上常见服务部署yaml</a><time datetime="2020-12-15T09:09:01.000Z" title="发表于 2020-12-15 17:09:01">2020-12-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/12/15/prometheus-operator%E5%91%8A%E8%AD%A6%E5%9C%BA%E6%99%AF/" title="Prometheus-Operator告警场景"><img src="/img/linuxqie.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Prometheus-Operator告警场景"/></a><div class="content"><a class="title" href="/2020/12/15/prometheus-operator%E5%91%8A%E8%AD%A6%E5%9C%BA%E6%99%AF/" title="Prometheus-Operator告警场景">Prometheus-Operator告警场景</a><time datetime="2020-12-15T09:00:01.000Z" title="发表于 2020-12-15 17:00:01">2020-12-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/08/26/k8s/" title="Kubernetes集群搭建"><img src="/img/linuxqie.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Kubernetes集群搭建"/></a><div class="content"><a class="title" href="/2020/08/26/k8s/" title="Kubernetes集群搭建">Kubernetes集群搭建</a><time datetime="2020-08-26T05:04:01.000Z" title="发表于 2020-08-26 13:04:01">2020-08-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/06/03/jenkins-CICD-k8s/" title="Jenkins持续集成到Kubernetes集群"><img src="/img/jenkins+k8s.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Jenkins持续集成到Kubernetes集群"/></a><div class="content"><a class="title" href="/2020/06/03/jenkins-CICD-k8s/" title="Jenkins持续集成到Kubernetes集群">Jenkins持续集成到Kubernetes集群</a><time datetime="2020-06-03T09:04:01.000Z" title="发表于 2020-06-03 17:04:01">2020-06-03</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/linuxqie.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2021 By huisebug</div><div class="footer_custom_text">huisebug一直奋斗</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

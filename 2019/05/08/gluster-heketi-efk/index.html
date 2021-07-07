@@ -1,0 +1,402 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>heketi安装结合EFK实践 | </title><meta name="keywords" content="k8s,heketi,elasticsearch,gluster,fluentd,fluent Bit,Amazon S3,kibana"><meta name="author" content="huisebug"><meta name="copyright" content="huisebug"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="这是一个k8s集群，搭建gluster fs系统提供存储服务，搭建heketi进行管理gluster fs，结合k8s的StorageClass进行动态pv建立。提供给生产环境的日志收集系统EFK存储数据。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="heketi安装结合EFK实践">
+<meta property="og:url" content="https://huisebug.github.io/2019/05/08/gluster-heketi-efk/index.html">
+<meta property="og:site_name">
+<meta property="og:description" content="这是一个k8s集群，搭建gluster fs系统提供存储服务，搭建heketi进行管理gluster fs，结合k8s的StorageClass进行动态pv建立。提供给生产环境的日志收集系统EFK存储数据。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://huisebug.github.io/img/linuxqie.jpg">
+<meta property="article:published_time" content="2019-05-08T09:04:01.000Z">
+<meta property="article:modified_time" content="2021-07-07T08:50:04.054Z">
+<meta property="article:author" content="huisebug">
+<meta property="article:tag" content="k8s">
+<meta property="article:tag" content="heketi">
+<meta property="article:tag" content="elasticsearch">
+<meta property="article:tag" content="gluster">
+<meta property="article:tag" content="fluentd">
+<meta property="article:tag" content="fluent Bit">
+<meta property="article:tag" content="Amazon S3">
+<meta property="article:tag" content="kibana">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://huisebug.github.io/img/linuxqie.jpg"><link rel="shortcut icon" href="/img/linuxqie.jpg"><link rel="canonical" href="https://huisebug.github.io/2019/05/08/gluster-heketi-efk/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'heketi安装结合EFK实践',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-07-07 16:50:04'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/linuxqie.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">15</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">46</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/download/"><i class="fa-fw fas fa-folder-open"></i><span> download</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/linuxqie.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/"></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/download/"><i class="fa-fw fas fa-folder-open"></i><span> download</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">heketi安装结合EFK实践</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2019-05-08T09:04:01.000Z" title="发表于 2019-05-08 17:04:01">2019-05-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-07-07T08:50:04.054Z" title="更新于 2021-07-07 16:50:04">2021-07-07</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Kubernetes/">Kubernetes</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="heketi安装结合EFK实践"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>这是一个k8s集群，搭建gluster fs系统提供存储服务，搭建heketi进行管理gluster fs，结合k8s的StorageClass进行动态pv建立。提供给生产环境的日志收集系统EFK存储数据。</p>
+<span id="more"></span>
+
+
+<h1 id="准备环境"><a href="#准备环境" class="headerlink" title="准备环境"></a>准备环境</h1><ul>
+<li>  操作系统：centos7</li>
+<li>  硬盘：/dev/vdc 50Gi</li>
+</ul>
+<h1 id="GlusterFS"><a href="#GlusterFS" class="headerlink" title="GlusterFS"></a>GlusterFS</h1><p>搭建glusterfs来作为可持续存储k8s的CSI</p>
+<h2 id="安装glusterfs"><a href="#安装glusterfs" class="headerlink" title="安装glusterfs"></a>安装glusterfs</h2><p><font color="red" size="3">三台服务器都要执行</font></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 先安装 gluster 源</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> yum install centos-release-gluster -y</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 安装 glusterfs 组件（这里包含了server和client）</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> yum install -y glusterfs glusterfs-server glusterfs-fuse glusterfs-rdma glusterfs-geo-replication glusterfs-devel</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 创建 glusterfs服务运行目录</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> mkdir /opt/glusterd</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 修改 glusterd 目录，将/var/lib改成/opt</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> sed -i <span class="string">&#x27;s/var/lib/opt/g&#x27;</span> /etc/glusterfs/glusterd.vol</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 启动 glusterfs（为挂载提供服务）</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> systemctl start glusterd.service</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 设置开机启动</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> systemctl <span class="built_in">enable</span> glusterd.service</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash">查看状态</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> systemctl status glusterd.service</span></span><br></pre></td></tr></table></figure>
+<h2 id="配置-glusterfs"><a href="#配置-glusterfs" class="headerlink" title="配置 glusterfs"></a>配置 glusterfs</h2><p><font color="red" size="3">三台服务器都要执行</font></p>
+<p>配置本地解析文件hosts</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;&quot;&quot;</span><br><span class="line">192.168.1.49 api.328ym.com</span><br><span class="line">192.168.1.55 node1.328ym.com</span><br><span class="line">192.168.1.100 node2.328ym.com</span><br><span class="line">&quot;&quot;&quot; &gt;&gt; /etc/hosts</span><br></pre></td></tr></table></figure>
+<p>开放端口（24007是gluster服务运行所需的端口号）如果关闭了防火墙就省略此步操作。其他防火墙设置自己解决</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -I INPUT -p tcp --dport 24007 -j ACCEPT</span><br></pre></td></tr></table></figure>
+<p>搭建完毕glusterFS</p>
+<h1 id="heketi"><a href="#heketi" class="headerlink" title="heketi"></a>heketi</h1><p>本项目参考github地址：<br><a target="_blank" rel="noopener" href="https://github.com/huisebug/heketi.git">https://github.com/huisebug/heketi.git</a></p>
+<h2 id="安装客户端"><a href="#安装客户端" class="headerlink" title="安装客户端"></a>安装客户端</h2><p>下载地址：<br><a target="_blank" rel="noopener" href="https://github.com/heketi/heketi/releases/">https://github.com/heketi/heketi/releases/</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tar zxf heketi-client-v9.0.0.linux.amd64.tar.gz</span><br><span class="line">mv heketi-client/bin/heketi-cli /usr/local/bin/</span><br></pre></td></tr></table></figure>
+<h2 id="创建ssh-key并分发"><a href="#创建ssh-key并分发" class="headerlink" title="创建ssh key并分发"></a>创建ssh key并分发</h2><p>在所有的glusterfs节点，创建hekeli的数据库存储目录、ssh免密码登录文件目录。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p /data/heketi/&#123;db,.ssh&#125; &amp;&amp; chmod 700 /data/heketi/.ssh</span><br><span class="line">ssh-keygen -t rsa -b 2048 -f /data/heketi/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
+<p>如果执行操作的节点可以免密登录到其他节点就可以执行下面命令，不行就手动分发</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">for NODE in node1 node2 node3; do scp -r /data/heketi/.ssh root@$&#123;NODE&#125;:/data/heketi; done</span><br><span class="line">for NODE in node1 node2 node3; do ssh-copy-id -i /data/heketi/.ssh/id_rsa.pub root@$&#123;NODE&#125; ; done</span><br></pre></td></tr></table></figure>
+<p>手动分发</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /data/heketi/.ssh/id_rsa.pub &gt;&gt; /root/.ssh/authorized_keys</span><br></pre></td></tr></table></figure>
+<h2 id="运行heketi"><a href="#运行heketi" class="headerlink" title="运行heketi"></a>运行heketi</h2><p>运行原理</p>
+<p>Heketi服务使用建立的ssh key登录到gluster fs服务器的root账户，然后就可以执行gluster fs服务进行管理。</p>
+<p>需要三个文件</p>
+<ol>
+<li> heketi-deployment.yaml：heketi服务运行yaml，其中需要声明登录到glusterfs的方式，<br><img src="/2019/05/08/gluster-heketi-efk/media/0cd50605f6fe88c9a2d54dcd601c5458.png"><br>需要指定ssh登录用户，此处我是root；ssh服务端口号，此处我未使用默认的22端口<br><img src="/2019/05/08/gluster-heketi-efk/media/a0c22912d94767400af35f22f8d5ccb3.png"><br>此处指定了node进行部署，所以记得修改你的节点特有的标签<br><img src="/2019/05/08/gluster-heketi-efk/media/e129a76f00b5b9ffb3261b8eff2b344f.png"><br>之前在所有运行gluster fs的服务器建立了/data/heketi/文件目录，这里指定其中节点运行就都可以使用hostPath方式volume，将生成的ssh key挂载到heketi服务中，让其可以远程发送命令操作gluster fs所在服务器，进行pv、vg管理（概念参考地址：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/zk47/p/4753987.html">https://www.cnblogs.com/zk47/p/4753987.html</a>）</li>
+<li>heketi-secret.yaml：这是设置登录到heketi服务的密码</li>
+<li>heketi-svc.yaml：因为我们需要使用客户端heketi-cli进行集群的创建，所以这里需要使用NodePort的方式进行访问</li>
+</ol>
+<p>执行安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f heketi-deployment.yaml -f heketi-secret.yaml</span><br></pre></td></tr></table></figure>
+<p><img src="/2019/05/08/gluster-heketi-efk/media/e34c65fa09a2506ef24da09089309f92.png"></p>
+<h2 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h2><p>这里配置Heketi的service在NodeIP：30944上<br>通过命令检查heketi服务</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -s &lt;http://api.328ym.com:30944/hello&gt;</span><br></pre></td></tr></table></figure>
+<p><img src="/2019/05/08/gluster-heketi-efk/media/eeac2c24a4fd82c65ec0c40451e706ca.png"></p>
+<h2 id="导入glusterfs集群拓扑（topology）信息"><a href="#导入glusterfs集群拓扑（topology）信息" class="headerlink" title="导入glusterfs集群拓扑（topology）信息"></a>导入glusterfs集群拓扑（topology）信息</h2><h3 id="文件内容heketi-topology-vdc-json"><a href="#文件内容heketi-topology-vdc-json" class="headerlink" title="文件内容heketi-topology-vdc.json"></a>文件内容heketi-topology-vdc.json</h3><p>参考heketi-topology-vdc.json文件地址：<br><a target="_blank" rel="noopener" href="https://raw.githubusercontent.com/huisebug/heketi/master/heketi-topology-vdc.json">https://raw.githubusercontent.com/huisebug/heketi/master/heketi-topology-vdc.json</a></p>
+<ul>
+<li>hostnames下的manage和storage配置为gluster的IP地址；</li>
+<li>zone可以配置为非0值，这里配置为1,；</li>
+<li>devices下制定gluster fs服务器下的文件驱动，例如：/dev/sdb，指定多个文件驱动！！！</li>
+<li>destroydata:是否销毁文件驱动的数据，这里使用了true</li>
+</ul>
+<p>有关glusterfs集群的topology的配置参考<br><a target="_blank" rel="noopener" href="https://github.com/heketi/heketi/blob/master/docs/admin/topology.md">https://github.com/heketi/heketi/blob/master/docs/admin/topology.md</a></p>
+<h3 id="执行"><a href="#执行" class="headerlink" title="执行"></a>执行</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">heketi-cli --user admin --secret password --server http://api.328ym.com:30944 topology load --json heketi-topology-vdc.json</span><br></pre></td></tr></table></figure>
+<p>查看heketi服务日志（kubectl logs -f heketi-7749795dc7-k6qnb）如果提示如下错误</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[sshexec] ERROR 2019/04/28 07:41:01</span><br><span class="line">/src/github.com/heketi/heketi/pkg/utils/ssh/ssh.go:172: Failed to run command[/bin/bash -c &#x27;pvcreate --metadatasize=128M --dataalignment=256K &#x27;/dev/vdc&#x27;&#x27;] on192.168.1.55:36888: Err[Process exited with status 5]: Stdout []: Stderr[WARNING: dos signature detected on /dev/vdc at offset 510. Wipe it? [y/n]: [n]</span><br><span class="line"></span><br><span class="line">Aborted wiping of dos.</span><br><span class="line"></span><br><span class="line">1 existing signature left on the device.</span><br></pre></td></tr></table></figure>
+<p>报错原因是无法手动向警告提示输入y或n,解决方法：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">那么就手动到所有gluster fs服务的命令行手动建立pv</span></span><br><span class="line">pvcreate --metadatasize=128M --dataalignment=256K &#x27;/dev/vdc&#x27;</span><br></pre></td></tr></table></figure>
+<p>执行后，每个节点出现ok就说明成功建立，可以使用vgscan命令进行查看。<br><img src="/2019/05/08/gluster-heketi-efk/media/56be8763bef7e833a452b30b66aa9d8f.png"></p>
+<p>查看集群id</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">heketi-cli --user admin --secret password --server http://api.328ym.com:30944 cluster list</span><br></pre></td></tr></table></figure>
+<p><img src="/2019/05/08/gluster-heketi-efk/media/8835df6c9d68d483a04655e492a2ad2b.png"></p>
+<h1 id="建立volume"><a href="#建立volume" class="headerlink" title="建立volume"></a>建立volume</h1><h2 id="非k8s使用"><a href="#非k8s使用" class="headerlink" title="非k8s使用"></a>非k8s使用</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">heketi-cli --user admin --secret password --server http://10.142.21.21:30088 volume create --size=100 --replica=3 --clusters=38c2729af0f42338cf66eed6b80f116f</span><br></pre></td></tr></table></figure>
+<h2 id="k8s使用"><a href="#k8s使用" class="headerlink" title="k8s使用"></a>k8s使用</h2><p>此处使用动态PV的方式，建立storageclass和pvc进行关联，然后动态建立pv</p>
+<h3 id="建立StorageClass"><a href="#建立StorageClass" class="headerlink" title="建立StorageClass"></a>建立StorageClass</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: storage.k8s.io/v1</span><br><span class="line">kind: StorageClass</span><br><span class="line">metadata:</span><br><span class="line">  name: gluster-heketi</span><br><span class="line">  annotations:</span><br><span class="line"><span class="meta">#</span><span class="bash">这里是将次storageclass设置为默认的class</span></span><br><span class="line">    storageclass.kubernetes.io/is-default-class: &quot;true&quot;</span><br><span class="line">provisioner: kubernetes.io/glusterfs</span><br><span class="line">parameters:</span><br><span class="line"><span class="meta">#</span><span class="bash">注意这里下面的地址需要能解析的到，我之前写的是service名，是无法解析的</span></span><br><span class="line">  resturl: &quot;http://api.328ym.com:30944&quot;</span><br><span class="line"><span class="meta">  #</span><span class="bash">resturl: <span class="string">&quot;http://heketi.default.svc.cluster.local:8080&quot;</span></span></span><br><span class="line">  clusterid: &quot;38c2729af0f42338cf66eed6b80f116f&quot;</span><br><span class="line">  restuser: &quot;admin&quot;</span><br><span class="line">  secretNamespace: &quot;default&quot;</span><br><span class="line">  secretName: &quot;heketi-secret&quot;</span><br><span class="line">  volumetype: &quot;none&quot;</span><br></pre></td></tr></table></figure>
+
+
+<p>执行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f heketi-storageclass.yaml</span><br></pre></td></tr></table></figure>
+<h3 id="建立pvc"><a href="#建立pvc" class="headerlink" title="建立pvc"></a>建立pvc</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">kind: PersistentVolumeClaim</span><br><span class="line">apiVersion: v1</span><br><span class="line">metadata:</span><br><span class="line">  name: test-claim</span><br><span class="line">spec:</span><br><span class="line">  storageClassName: gluster-heketi</span><br><span class="line">  accessModes:</span><br><span class="line">    - ReadWriteMany</span><br><span class="line">  resources:</span><br><span class="line">    requests:</span><br><span class="line">      storage: 1Gi</span><br></pre></td></tr></table></figure>
+
+<p>执行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f heketi-test-pvc.yaml</span><br></pre></td></tr></table></figure>
+<p>查看volume建立情况</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">heketi-cli --user admin --secret password --server http://api.328ym.com:30944 volume list</span><br></pre></td></tr></table></figure>
+<p><img src="/2019/05/08/gluster-heketi-efk/media/900652bd5bcfa3fd2616833b624ba825.png"></p>
+<p>查看是否建立pvc和自动建立pv<br><img src="/2019/05/08/gluster-heketi-efk/media/05fd955b3a7c9fa630b2d53827fd4196.png"></p>
+<p>查看gluster fs 卷信息和挂载情况<br><img src="/2019/05/08/gluster-heketi-efk/media/629944482c78b0a4a1d17e63a355d443.png"></p>
+<p>查看卷的使用情况和集群情况</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">heketi-cli --user admin --secret password --server http://api.328ym.com:30944 topology info</span><br></pre></td></tr></table></figure>
+<p><img src="/2019/05/08/gluster-heketi-efk/media/43aed50dfec86966e2b3a6add7481d2f.png"></p>
+<h4 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h4><p>###实践###</p>
+<p>此处我们的gluster fs是使用了三块50Gi的硬盘组成的集群，验证当申请超过50Gi的时候会如何建立，能否建立成功？</p>
+<ol>
+<li> 我们复制之前的test-pvc 文件，将其修改为如下<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp -rf heketi-test-pvc.yaml heketi-test-pvc2.yaml</span><br></pre></td></tr></table></figure>
+heketi-test-pvc2.yaml<br><img src="/2019/05/08/gluster-heketi-efk/media/f300b6763104152518a88fdca4bf35e5.png"></li>
+</ol>
+<p>执行<br><img src="/2019/05/08/gluster-heketi-efk/media/dbd5f81c5583ceb2f6da81d02f9ede9b.png"></p>
+<p>查看挂载情况<br><img src="/2019/05/08/gluster-heketi-efk/media/15e98081d9555131c50e70bb7c45946e.png"></p>
+<p>难道说这里使用了30Gi，会平均从其他gluster节点划取空间？</p>
+<p>查看gluster fs信息<br><img src="/2019/05/08/gluster-heketi-efk/media/f44ef1ae11314a578a70bfee826a5c25.png"></p>
+<p>获取到另一个来源是192.168.1.55这台服务器，切换到这台服务器进行查看<br><img src="/2019/05/08/gluster-heketi-efk/media/00e976b33bb64b4e61c963bde7015fe6.png"></p>
+<p>果然证实了我的猜测。</p>
+<p>查看pvc和pv<br><img src="/2019/05/08/gluster-heketi-efk/media/a897acabf12b1880df044ee352d7d67a.png"></p>
+<p>删除pvc配置<br><img src="/2019/05/08/gluster-heketi-efk/media/6cdb312b57897f5b6820d0d4fa207d7c.png"></p>
+<p>pv也会自动删除<br><img src="/2019/05/08/gluster-heketi-efk/media/ec91e528428e072ba9b091ed2b7aa628.png"></p>
+<h1 id="EFK"><a href="#EFK" class="headerlink" title="EFK"></a>EFK</h1><p>作为整个集群的日志系统，我们可以使用三台性能优越的服务器安装好kubelet、kube-proxy、docker后将其作为node加入到现有的集群中去，并将其打上efk的标签，不允许其他pod调度到服务器上面。</p>
+<p>列如:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl label node efk1.huisebug.com efknode=efk</span><br><span class="line">kubectl label node efk2.huisebug.com efknode=efk</span><br><span class="line">kubectl label node efk3.huisebug.com efknode=efk</span><br></pre></td></tr></table></figure>
+<p>我这里就不这样进行操作了，还是将efk服务安装到整个集群中</p>
+<h2 id="yaml文件下载地址"><a href="#yaml文件下载地址" class="headerlink" title="yaml文件下载地址"></a>yaml文件下载地址</h2><p>参考我的git地址</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/huisebug/EFK.git</span><br></pre></td></tr></table></figure>
+<h2 id="ElasticSearch"><a href="#ElasticSearch" class="headerlink" title="ElasticSearch"></a>ElasticSearch</h2><ul>
+<li>ES的官网推荐，不太推荐使用分布式文件系统（NFS/GlusterFS等）来进行数据的存储，对ES的性能会造成很大的影响。</li>
+<li>这里我就不使用之前搭建的GlusterFS系统了。使用 local-storage（1.9版本引入，将本地存储以PV形式提供给容器进行使用，实现存储空间的管理）作为storageClassName，PVC概念参考官方网址<br><a target="_blank" rel="noopener" href="https://www.kubernetes.org.cn/pvpvcstorageclass">https://www.kubernetes.org.cn/pvpvcstorageclass</a></li>
+</ul>
+<h3 id="local-storage"><a href="#local-storage" class="headerlink" title="local-storage"></a>local-storage</h3><p><font color="red" size="3">三台服务器都要执行</font></p>
+<h4 id="新加硬盘"><a href="#新加硬盘" class="headerlink" title="新加硬盘"></a>新加硬盘</h4><p>所以此处我们新加硬盘来建立local-storage</p>
+<p>我这里是虚拟机，可以直接增加新硬盘SCSI接口硬盘进行热插拔，不重启系统，刷新出硬盘</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> ls /sys/class/scsi_host/</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">echo</span> <span class="string">&quot;- - -&quot;</span> &gt; /sys/class/scsi_host/host0/scan</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">echo</span> <span class="string">&quot;- - -&quot;</span> &gt; /sys/class/scsi_host/host1/scan</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">echo</span> <span class="string">&quot;- - -&quot;</span> &gt; /sys/class/scsi_host/host2/scan</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> fdisk -l</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2019/05/08/gluster-heketi-efk/media/80781fb065626438799a77bd10bdc213.png"></p>
+<p>上面的sdc硬盘20G就是我新加的硬盘</p>
+<h4 id="分区格式化并挂载到各宿主机的-data目录"><a href="#分区格式化并挂载到各宿主机的-data目录" class="headerlink" title="分区格式化并挂载到各宿主机的/data目录"></a>分区格式化并挂载到各宿主机的/data目录</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> fdisk -l /dev/sdc</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 建立分区并格式化为xfs类型</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> fdisk /dev/sdc</span></span><br><span class="line">1.  n 建立新分区</span><br><span class="line">2.  p 建立主分区</span><br><span class="line">3.  1 分区号为1</span><br><span class="line">4.  一直回车默认，将整块磁盘建立为一个分区，使用全部空间</span><br><span class="line">5.  w 保存退出</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 使分区生效</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> partprobe /dev/sdc</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 强制格式化为xfs</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> mkfs.xfs -f /dev/sdc1</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 手动将/dev/sdc1分区挂载到/data</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> mkdir /data &amp;&amp; mount /dev/sdc1 /data</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 开机自动挂载</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">echo</span> <span class="string">&quot;/dev/sdc1 /data xfs defaults 0 0&quot;</span> &gt;&gt; /etc/fstab</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看挂载状态</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> df -hT</span></span><br></pre></td></tr></table></figure>
+<h4 id="建立相应的PV"><a href="#建立相应的PV" class="headerlink" title="建立相应的PV"></a>建立相应的PV</h4><p>参考地址：<br><a target="_blank" rel="noopener" href="https://github.com/huisebug/EFK/blob/master/efkyaml/es-pv-api.yaml">https://github.com/huisebug/EFK/blob/master/efkyaml/es-pv-api.yaml</a><br><a target="_blank" rel="noopener" href="https://github.com/huisebug/EFK/blob/master/efkyaml/es-pv-node1.yaml">https://github.com/huisebug/EFK/blob/master/efkyaml/es-pv-node1.yaml</a><br><a target="_blank" rel="noopener" href="https://github.com/huisebug/EFK/blob/master/efkyaml/es-pv-node2.yaml">https://github.com/huisebug/EFK/blob/master/efkyaml/es-pv-node2.yaml</a></p>
+<p>注意：存储大小，别超过实际大小；指定正确的存储类型；指定正确的本地路径；指定连接的服务器主机名</p>
+<ul>
+<li>accessModes:<pre><code>- ReadWriteOnce 注意这里定义的访问模式是单个节点读写。即一个pv只给一个pvc使用，像我们这里是3个pv，那么只能有3个pod调用pv，就算定义为ReadWriteMany也是如此。
+</code></pre>
+</li>
+<li>  回收策略persistentVolumeReclaimPolicy: Retain保留<br>该Retain回收政策允许资源的回收手册。当PersistentVolumeClaim删除时，PersistentVolume仍然存在，并且该卷被视为“已释放”。但它尚未提供另一项索赔，因为之前的索赔人的数据仍在数量上。管理员可以使用以下步骤手动回收卷。</li>
+</ul>
+<ol>
+<li> 删除PersistentVolume。删除PV后，外部基础架构（例如AWS EBS，GCEPD，Azure磁盘或Cinder卷）中的关联存储资产仍然存在。</li>
+<li> 相应地手动清理相关存储资产上的数据。</li>
+<li> 手动删除关联的存储资产，或者如果要重用同一存储资产，请PersistentVolume使用存储资产定义创建新的存储资产。</li>
+</ol>
+<p>建立pv</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f es-pv-api.yaml -f es-pv-node1.yaml -f es-pv-node2.yaml</span><br></pre></td></tr></table></figure>
+<p><img src="/2019/05/08/gluster-heketi-efk/media/3c40a922669b09615e630bad14aa0c1c.png"></p>
+<h3 id="Elasticsearch安装"><a href="#Elasticsearch安装" class="headerlink" title="Elasticsearch安装"></a>Elasticsearch安装</h3><p>Elasticsearch最佳实践建议将节点分成三个角色：</p>
+<ul>
+<li>  Master 节点 - 仅用于集群管理，无数据，无HTTP API</li>
+<li>  Data 节点 - 用于客户端使用和数据</li>
+<li>  Ingest 节点 - 用于摄取期间的文档预处理<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Master节点		</span><br><span class="line">es-master-discovery-svc.yaml  </span><br><span class="line">es-master-pdb.yaml  </span><br><span class="line">es-master-stateful.yaml  </span><br><span class="line">es-master-svc.yaml	</span><br><span class="line">Data节点</span><br><span class="line">es-data-pdb.yaml  </span><br><span class="line">es-data-stateful.yaml</span><br><span class="line">es-svc.yaml	</span><br><span class="line">Ingest 节点</span><br><span class="line">es-ingest-deployment.yaml  </span><br><span class="line">es-ingest-svc.yaml</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>（非常）重要说明</p>
+<ul>
+<li>  Elasticsearch pod需要init-container以特权模式运行，因此它可以设置一些VM选项。为此，kubelet应该使用args运行–allow-privileged，否则init-container将无法运行。</li>
+<li>  默认情况下，ES_JAVA_OPTS设置为-Xms256m -Xmx256m。这是一个非常低的值，但许多用户，即minikube用户，由于主机内存不足而导致pod被杀的问题。可以在此存储库中可用的部署描述符中更改此设置。此处我的data就修改为了1024m,如果报错，请根据日志信息（kubectllogs es-data-0 -n efk）获取的日志信息来进行调整。</li>
+<li>  目前，Kubernetes pod描述符emptyDir用于在每个数据节点容器中存储数据。这是为了简单起见，应根据一个人的存储需求进行调整。</li>
+<li>  statefulset包含部署数据豆荚作为一个例子StatefulSet。这些使用一个volumeClaimTemplates为每个pod配置持久存储。此处已经说明了pv建立时模式是单节点的，所以可根据自己需求来进行调整两个statefulset的replicas数量（此处我是data1个 master 2个。）</li>
+<li>  默认情况下，PROCESSORS设置为1。对于某些部署，这可能是不够的，尤其是在启动时。根据需要调整resources.limits.cpu和或livenessProbe相应。请注意，resources.limits.cpu必须是整数。</li>
+<li>  elasticsearch的服务端和访问的客户端版本必须一致，不然会导致elasticsearch服务停掉。列如我这里对应版本为<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash">   elasticsearch:6.3.2</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">   fluentd-elasticsearch:2.4.0</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">   fluent-bit:0.13.2</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">   kibana:6.3.2</span></span><br></pre></td></tr></table></figure>
+<font color="red" size="6">常见问题</font></li>
+</ul>
+<p>为什么NUMBER_OF_MASTERS与master-replicas的数量不同？</p>
+<ul>
+<li>之前master-replicas的数量是3，因为pv的模式问题，我修改为了2;</li>
+<li>此环境变量的默认值为2，表示群集至少需要2个主节点才能运行。如果一个集群有3个主服务器并且有一个管理器死亡，则集群仍可正常工通常是最小主节点n/2 +1，其中n是群集中主节点的数量。如果一个集群有5个主节点，则一个节点应该至少有3个节点，小于该节点并且集群停止。如果缩放主数量，请确保通过Elasticsearch API更新主节点的最小数量，因为设置环境变量仅适用于群集设置。</li>
+</ul>
+<h3 id="检查是否成功建立"><a href="#检查是否成功建立" class="headerlink" title="检查是否成功建立"></a>检查是否成功建立</h3><p>pv和pvc</p>
+<p><img src="/2019/05/08/gluster-heketi-efk/media/1651a5b8c5412e6195d82bdc2388fa48.png"></p>
+<p>pod</p>
+<p><img src="/2019/05/08/gluster-heketi-efk/media/c962cc652b80f1d70e78588f05431745.png"></p>
+<h3 id="Clean-up-with-Curator"><a href="#Clean-up-with-Curator" class="headerlink" title="Clean-up with Curator"></a>Clean-up with Curator</h3><p>主要用于清理elasticsearch超过天数的数据，更多高级用法参考官方网站<br><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/client/curator/current/index.html">https://www.elastic.co/guide/en/elasticsearch/client/curator/current/index.html</a></p>
+<h4 id="创建curator"><a href="#创建curator" class="headerlink" title="创建curator"></a>创建curator</h4><p>使用到的yaml</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">es-curator-configmap.yaml </span><br><span class="line">es-curator-cronJob.yaml</span><br></pre></td></tr></table></figure>
+<p>我们将其设置为一个定时任务，每天1点整进行清理超过3天的数据</p>
+<h2 id="Kibana"><a href="#Kibana" class="headerlink" title="Kibana"></a>Kibana</h2><ul>
+<li>  Kibana是一个开源的分析和可视化平台，设计用于和Elasticsearch一起工作。</li>
+<li>  你用Kibana来搜索，查看，并和存储在Elasticsearch索引中的数据进行交互。</li>
+<li>  你可以轻松地执行高级数据分析，并且以各种图标、表格和地图的形式可视化数据。</li>
+<li>  Kibana使得理解大量数据变得很容易。它简单的、基于浏览器的界面使你能够快速创建和共享动态仪表板，实时显示Elasticsearch查询的变化。</li>
+</ul>
+<h3 id="使用到的yaml文件"><a href="#使用到的yaml文件" class="headerlink" title="使用到的yaml文件"></a>使用到的yaml文件</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kibana-configmap.yaml </span><br><span class="line">kibana-deployment.yaml </span><br><span class="line">kibana-ingress.yaml </span><br><span class="line">kibana-svc.yaml</span><br></pre></td></tr></table></figure>
+<h3 id="kibana的汉化"><a href="#kibana的汉化" class="headerlink" title="kibana的汉化"></a>kibana的汉化</h3><p>kibana的汉化方式，已经放到了Docker目录下，也可以使用我已经汉化好的镜像</p>
+<h3 id="验证效果"><a href="#验证效果" class="headerlink" title="验证效果"></a>验证效果</h3><p><img src="/2019/05/08/gluster-heketi-efk/media/bd690c08153c19412518a92c05a2b707.png"></p>
+<p><img src="/2019/05/08/gluster-heketi-efk/media/fff34a31b356199cecb711511bed9074.png"></p>
+<h2 id="Fluent"><a href="#Fluent" class="headerlink" title="Fluent"></a>Fluent</h2><table>
+<thead>
+<tr>
+<th><strong>组件</strong></th>
+<th><strong>用途</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Fluent Bit</td>
+<td>拉起在每台宿主机上采集宿主机上的容器日志。（Fluent Bit 比较新一些，但是资源消耗比较低，性能比Fluentd好一些，但稳定性有待于进一步提升）</td>
+</tr>
+<tr>
+<td>Fluentd</td>
+<td>两个用途：1 以日志收集中转中心角色拉起，Deployment部署模式；2 在部分Fluent Bit无法正常运行的主机上，以Daemon Set模式运行采集宿主机上的日志，并发送给日志收集中转中心</td>
+</tr>
+<tr>
+<td>ElasticSearch</td>
+<td>用来接收日志收集中转中心发送过来的日志，并通过Kibana分析展示出来，鉴于硬件资源有限，仅保留一周左右的数据。</td>
+</tr>
+<tr>
+<td>Amazon S3（fluentd server）</td>
+<td>用来接收日志收集中转中心发送过来的日志，对日志进行压缩归档，也可后续使用Spark进行进一步大数据分析。</td>
+</tr>
+</tbody></table>
+<h3 id="fluentd直接传递es建立"><a href="#fluentd直接传递es建立" class="headerlink" title="fluentd直接传递es建立"></a>fluentd直接传递es建立</h3><p>此处我们演示fluentd直接向elasticsearch传递数据建立使用，使用到的yaml分别如下<br>fluentd</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">fluentd-es-configmap.yaml </span><br><span class="line">fluentd-es-daemonset.yaml </span><br></pre></td></tr></table></figure>
+<h4 id="给-Node-设置标签"><a href="#给-Node-设置标签" class="headerlink" title="给 Node 设置标签"></a>给 Node 设置标签</h4><p>定义fluentd-es-daemonset.yaml时设置了nodeSelector beta.kubernetes.io/fluentd-ds-ready=true,所以需要在期望运⾏fluentd 的 Node上设置该标签；</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">for i in api.huisebug.com node1.huisebug.com node2.huisebug.com; do kubectl label nodes $i beta.kubernetes.io/fluentd-ds-ready=true; done</span><br></pre></td></tr></table></figure>
+<p>我们这里是新建一个namespace:efk,所以建立fluentd-es-daemonset.yaml不能使用pod优先级priorityClassName:system-node-critical，需要注释掉。</p>
+<p>查看是否成功建立<br><img src="/2019/05/08/gluster-heketi-efk/media/6e612c350a890843a2ce65d5669ac0be.png"></p>
+<h4 id="验证整个EFK效果"><a href="#验证整个EFK效果" class="headerlink" title="验证整个EFK效果"></a>验证整个EFK效果</h4><p>添加kibana检测到fluent传递给es的日志信息，并建立索引，如果整个集群没有建立成功，是不会自动出现如下界面的。<br><img src="/2019/05/08/gluster-heketi-efk/media/1cf4f7d8a5825ddfa7f2d3dc077c2ca1.png"><br><img src="/2019/05/08/gluster-heketi-efk/media/3c50a0817eaa90a897007390f5db2c0a.png"><br><img src="/2019/05/08/gluster-heketi-efk/media/468f9ba86fc233a8b61b81f1c0ce8c6c.png"><br><img src="/2019/05/08/gluster-heketi-efk/media/f9de546baaaa48061282b11c46797b6e.png"><br><img src="/2019/05/08/gluster-heketi-efk/media/e5fa8cf07a03894e139bb2a17299a6d1.png"></p>
+<h3 id="fluentd传递S3然后传递es"><a href="#fluentd传递S3然后传递es" class="headerlink" title="fluentd传递S3然后传递es"></a>fluentd传递S3然后传递es</h3><h4 id="Amazon-S3镜像建立"><a href="#Amazon-S3镜像建立" class="headerlink" title="Amazon S3镜像建立"></a>Amazon S3镜像建立</h4><p>基于官方镜像添加对S3的支持，可在Docker目录下查找到Dockerfile,参考地址：<br><a target="_blank" rel="noopener" href="https://github.com/huisebug/EFK/blob/master/fluentd/Docker/Dockerfile">https://github.com/huisebug/EFK/blob/master/fluentd/Docker/Dockerfile</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">FROM huisebug/sec_re:fluentd-elasticsearch-2.4.0</span><br><span class="line">RUN \</span><br><span class="line">    apt-get update -y &amp;&amp; apt-get install ruby-dev -y &amp;&amp; \</span><br><span class="line">    gem install fluent-plugin-s3 &amp;&amp; \</span><br><span class="line">    apt-get clean</span><br></pre></td></tr></table></figure>
+<p>也可以直接使用我已经上传到dockerhub的镜像</p>
+<p>使用到的yaml文件</p>
+<p>fluentd</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">fluentd-es-f-configmap.yaml  </span><br><span class="line">fluentd-es-f-daemonset.yaml</span><br></pre></td></tr></table></figure>
+<p>S3</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">fluentd-server-s3-configmap.yaml  </span><br><span class="line">fluentd-server-s3-deployment.yaml</span><br></pre></td></tr></table></figure>
+
+<p>其中的fluentd-es-f-daemonset.yaml与之前的fluentd-es-daemonset.yaml内容相同，这里我为了便于区分。</p>
+<p>fluentd-es-f-configmap.yaml 内容变更如下：</p>
+<ul>
+<li>  调整output.conf。</li>
+<li>  移除ES片段。</li>
+<li>  添加forward片段。</li>
+</ul>
+<p><font color="red" size="5">注意！！！</font></p>
+<p>为了不影响测试效果，我们需要删除es建立的数据，并重新建立,切换到es的yaml文件所在目录<br>api.huisebug.com主机：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete -f . &amp;&amp; rm -rf /data/*</span><br></pre></td></tr></table></figure>
+<p>其余节点主机：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rm -rf /data/*</span><br></pre></td></tr></table></figure>
+<p>并且删除之前直接传递建立的fluentd</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete -f fluentd-es-configmap.yaml -f fluentd-es-daemonset.yaml</span><br></pre></td></tr></table></figure>
+<p>查看效果<br><img src="/2019/05/08/gluster-heketi-efk/media/b63dea69786594266a83dedb8dbb6fc8.png"></p>
+<p>访问kibana验证<br><img src="/2019/05/08/gluster-heketi-efk/media/92d32089d7652845cf6a29131b802b55.png"></p>
+<h3 id="fluentd-bit传递到S3然后传递es"><a href="#fluentd-bit传递到S3然后传递es" class="headerlink" title="fluentd bit传递到S3然后传递es"></a>fluentd bit传递到S3然后传递es</h3><p>使用到的yaml文件</p>
+<p>fluentd-bit</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">fluentd-bit-es-f-configmap.yaml  </span><br><span class="line">fluentd-bit-es-f-daemonset.yaml</span><br></pre></td></tr></table></figure>
+<p>S3</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">fluentd-bit-server-s3-configmap.yaml  </span><br><span class="line">fluentd-bit-server-s3-deployment.yaml</span><br></pre></td></tr></table></figure>
+
+<p>其中的S3使用的yaml内容与之前的内容相同，这里我为了便于区分。</p>
+<p>注意！！！</p>
+<p>为了不影响测试效果，我们需要删除es建立的数据，并重新建立,切换到es的yaml文件所在目录</p>
+<p>api.huisebug.com主机：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete -f . &amp;&amp; rm -rf /data/*</span><br></pre></td></tr></table></figure>
+<p>其余节点主机：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rm -rf /data/*</span><br></pre></td></tr></table></figure>
+<p>并且删除之前直接传递建立的fluentd-s3</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete -f fluentd-es-f-configmap.yaml -f fluentd-es-f-daemonset.yaml</span><br></pre></td></tr></table></figure>
+<p>查看效果<br><img src="/2019/05/08/gluster-heketi-efk/media/da78835eb4971c148ce076b23dd94ced.png"></p>
+<h1 id="GlusterFS-Heketi-EFK"><a href="#GlusterFS-Heketi-EFK" class="headerlink" title="GlusterFS+Heketi+EFK"></a>GlusterFS+Heketi+EFK</h1><p>适用于生产环境</p>
+<p>参考yaml文件</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/huisebug/GlusterFS-Heketi-EFK.git">https://github.com/huisebug/GlusterFS-Heketi-EFK.git</a></p>
+<p>三个文件夹，其他文件夹目录内容不变，这里主要需要修改<a target="_blank" rel="noopener" href="https://github.com/huisebug/GlusterFS-Heketi-EFK/tree/master/ekheketi">ekheketi</a>文件中的内容</p>
+<h2 id="ekheketi"><a href="#ekheketi" class="headerlink" title="ekheketi"></a>ekheketi</h2><hr>
+<p>将之前的ElasticSearch服务的三个角色分类文件目录存放，修改statefulset使用到的pvc的为storageClassName:<br>gluster-heketi，如下<br><img src="/2019/05/08/gluster-heketi-efk/media/9fd8e80a42eb7024c7dbb992451022db.png"></p>
+<p>即可完成！！！</p>
+<p>此处整个efk集群使用到pvc的有es-master和es-data。</p>
+<p>搭建完成后查看是否成功<br><img src="/2019/05/08/gluster-heketi-efk/media/20db3e1e73d82ec051463eddfe81345c.png"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">huisebug</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://huisebug.github.io/2019/05/08/gluster-heketi-efk/">https://huisebug.github.io/2019/05/08/gluster-heketi-efk/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://huisebug.github.io" target="_blank"></a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/k8s/">k8s</a><a class="post-meta__tags" href="/tags/heketi/">heketi</a><a class="post-meta__tags" href="/tags/elasticsearch/">elasticsearch</a><a class="post-meta__tags" href="/tags/gluster/">gluster</a><a class="post-meta__tags" href="/tags/fluentd/">fluentd</a><a class="post-meta__tags" href="/tags/fluent-Bit/">fluent Bit</a><a class="post-meta__tags" href="/tags/Amazon-S3/">Amazon S3</a><a class="post-meta__tags" href="/tags/kibana/">kibana</a></div><div class="post_share"><div class="social-share" data-image="/img/linuxqie.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button button--animated"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/img/wechat.jpg" target="_blank"><img class="post-qr-code-img" src="/img/wechat.jpg" alt="wechat"/></a><div class="post-qr-code-desc">wechat</div></li><li class="reward-item"><a href="/img/alipay.jpg" target="_blank"><img class="post-qr-code-img" src="/img/alipay.jpg" alt="alipay"/></a><div class="post-qr-code-desc">alipay</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2019/05/23/knative/"><img class="prev-cover" src="/img/linuxqie.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">国内安装knative v0.6.0使用dockerhub镜像</div></div></a></div><div class="next-post pull-right"><a href="/2019/04/19/huaweiyun-create-SLB/"><img class="next-cover" src="/img/head.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">华为云配置负载均衡器</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2018/09/06/k8s常见方法及错误解决/" title="持续更新-20190306-k8s常见方法及错误解决"><img class="cover" src="/img/linuxqie.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-09-06</div><div class="title">持续更新-20190306-k8s常见方法及错误解决</div></div></a></div><div><a href="/2020/12/15/k8s高版本服务部署yaml/" title="k8s集群高版本1.18以上常见服务部署yaml"><img class="cover" src="/img/linuxqie.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-15</div><div class="title">k8s集群高版本1.18以上常见服务部署yaml</div></div></a></div><div><a href="/2021/07/06/kata容器的一些分享/" title="kata容器的一些分享"><img class="cover" src="/img/kata.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-07-06</div><div class="title">kata容器的一些分享</div></div></a></div><div><a href="/2020/12/15/prometheus-operator告警场景/" title="Prometheus-Operator告警场景"><img class="cover" src="/img/linuxqie.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-15</div><div class="title">Prometheus-Operator告警场景</div></div></a></div><div><a href="/2019/08/27/Prometheus-Operator/" title="Prometheus-Operator监控k8s"><img class="cover" src="/img/head.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-08-27</div><div class="title">Prometheus-Operator监控k8s</div></div></a></div><div><a href="/2020/06/03/jenkins-CICD-k8s/" title="Jenkins持续集成到Kubernetes集群"><img class="cover" src="/img/jenkins+k8s.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-06-03</div><div class="title">Jenkins持续集成到Kubernetes集群</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/linuxqie.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">huisebug</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">15</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">46</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/huisebug" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:huisebug@outlook.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">记录容器生活</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E7%8E%AF%E5%A2%83"><span class="toc-number">1.</span> <span class="toc-text">准备环境</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#GlusterFS"><span class="toc-number">2.</span> <span class="toc-text">GlusterFS</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85glusterfs"><span class="toc-number">2.1.</span> <span class="toc-text">安装glusterfs</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE-glusterfs"><span class="toc-number">2.2.</span> <span class="toc-text">配置 glusterfs</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#heketi"><span class="toc-number">3.</span> <span class="toc-text">heketi</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="toc-number">3.1.</span> <span class="toc-text">安装客户端</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BAssh-key%E5%B9%B6%E5%88%86%E5%8F%91"><span class="toc-number">3.2.</span> <span class="toc-text">创建ssh key并分发</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%90%E8%A1%8Cheketi"><span class="toc-number">3.3.</span> <span class="toc-text">运行heketi</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81"><span class="toc-number">3.4.</span> <span class="toc-text">验证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%BC%E5%85%A5glusterfs%E9%9B%86%E7%BE%A4%E6%8B%93%E6%89%91%EF%BC%88topology%EF%BC%89%E4%BF%A1%E6%81%AF"><span class="toc-number">3.5.</span> <span class="toc-text">导入glusterfs集群拓扑（topology）信息</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E5%86%85%E5%AE%B9heketi-topology-vdc-json"><span class="toc-number">3.5.1.</span> <span class="toc-text">文件内容heketi-topology-vdc.json</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C"><span class="toc-number">3.5.2.</span> <span class="toc-text">执行</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BB%BA%E7%AB%8Bvolume"><span class="toc-number">4.</span> <span class="toc-text">建立volume</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9D%9Ek8s%E4%BD%BF%E7%94%A8"><span class="toc-number">4.1.</span> <span class="toc-text">非k8s使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#k8s%E4%BD%BF%E7%94%A8"><span class="toc-number">4.2.</span> <span class="toc-text">k8s使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BB%BA%E7%AB%8BStorageClass"><span class="toc-number">4.2.1.</span> <span class="toc-text">建立StorageClass</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BB%BA%E7%AB%8Bpvc"><span class="toc-number">4.2.2.</span> <span class="toc-text">建立pvc</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E8%B7%B5"><span class="toc-number">4.2.2.1.</span> <span class="toc-text">实践</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#EFK"><span class="toc-number">5.</span> <span class="toc-text">EFK</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#yaml%E6%96%87%E4%BB%B6%E4%B8%8B%E8%BD%BD%E5%9C%B0%E5%9D%80"><span class="toc-number">5.1.</span> <span class="toc-text">yaml文件下载地址</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ElasticSearch"><span class="toc-number">5.2.</span> <span class="toc-text">ElasticSearch</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#local-storage"><span class="toc-number">5.2.1.</span> <span class="toc-text">local-storage</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%B0%E5%8A%A0%E7%A1%AC%E7%9B%98"><span class="toc-number">5.2.1.1.</span> <span class="toc-text">新加硬盘</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E5%8C%BA%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%B9%B6%E6%8C%82%E8%BD%BD%E5%88%B0%E5%90%84%E5%AE%BF%E4%B8%BB%E6%9C%BA%E7%9A%84-data%E7%9B%AE%E5%BD%95"><span class="toc-number">5.2.1.2.</span> <span class="toc-text">分区格式化并挂载到各宿主机的&#x2F;data目录</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BB%BA%E7%AB%8B%E7%9B%B8%E5%BA%94%E7%9A%84PV"><span class="toc-number">5.2.1.3.</span> <span class="toc-text">建立相应的PV</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Elasticsearch%E5%AE%89%E8%A3%85"><span class="toc-number">5.2.2.</span> <span class="toc-text">Elasticsearch安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A3%80%E6%9F%A5%E6%98%AF%E5%90%A6%E6%88%90%E5%8A%9F%E5%BB%BA%E7%AB%8B"><span class="toc-number">5.2.3.</span> <span class="toc-text">检查是否成功建立</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Clean-up-with-Curator"><span class="toc-number">5.2.4.</span> <span class="toc-text">Clean-up with Curator</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9B%E5%BB%BAcurator"><span class="toc-number">5.2.4.1.</span> <span class="toc-text">创建curator</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Kibana"><span class="toc-number">5.3.</span> <span class="toc-text">Kibana</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E5%88%B0%E7%9A%84yaml%E6%96%87%E4%BB%B6"><span class="toc-number">5.3.1.</span> <span class="toc-text">使用到的yaml文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#kibana%E7%9A%84%E6%B1%89%E5%8C%96"><span class="toc-number">5.3.2.</span> <span class="toc-text">kibana的汉化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81%E6%95%88%E6%9E%9C"><span class="toc-number">5.3.3.</span> <span class="toc-text">验证效果</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Fluent"><span class="toc-number">5.4.</span> <span class="toc-text">Fluent</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#fluentd%E7%9B%B4%E6%8E%A5%E4%BC%A0%E9%80%92es%E5%BB%BA%E7%AB%8B"><span class="toc-number">5.4.1.</span> <span class="toc-text">fluentd直接传递es建立</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%99-Node-%E8%AE%BE%E7%BD%AE%E6%A0%87%E7%AD%BE"><span class="toc-number">5.4.1.1.</span> <span class="toc-text">给 Node 设置标签</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81%E6%95%B4%E4%B8%AAEFK%E6%95%88%E6%9E%9C"><span class="toc-number">5.4.1.2.</span> <span class="toc-text">验证整个EFK效果</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#fluentd%E4%BC%A0%E9%80%92S3%E7%84%B6%E5%90%8E%E4%BC%A0%E9%80%92es"><span class="toc-number">5.4.2.</span> <span class="toc-text">fluentd传递S3然后传递es</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Amazon-S3%E9%95%9C%E5%83%8F%E5%BB%BA%E7%AB%8B"><span class="toc-number">5.4.2.1.</span> <span class="toc-text">Amazon S3镜像建立</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#fluentd-bit%E4%BC%A0%E9%80%92%E5%88%B0S3%E7%84%B6%E5%90%8E%E4%BC%A0%E9%80%92es"><span class="toc-number">5.4.3.</span> <span class="toc-text">fluentd bit传递到S3然后传递es</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#GlusterFS-Heketi-EFK"><span class="toc-number">6.</span> <span class="toc-text">GlusterFS+Heketi+EFK</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#ekheketi"><span class="toc-number">6.1.</span> <span class="toc-text">ekheketi</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/07/06/kata%E5%AE%B9%E5%99%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E5%88%86%E4%BA%AB/" title="kata容器的一些分享"><img src="/img/kata.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="kata容器的一些分享"/></a><div class="content"><a class="title" href="/2021/07/06/kata%E5%AE%B9%E5%99%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E5%88%86%E4%BA%AB/" title="kata容器的一些分享">kata容器的一些分享</a><time datetime="2021-07-06T06:04:01.000Z" title="发表于 2021-07-06 14:04:01">2021-07-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/12/15/k8s%E9%AB%98%E7%89%88%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2yaml/" title="k8s集群高版本1.18以上常见服务部署yaml"><img src="/img/linuxqie.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="k8s集群高版本1.18以上常见服务部署yaml"/></a><div class="content"><a class="title" href="/2020/12/15/k8s%E9%AB%98%E7%89%88%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2yaml/" title="k8s集群高版本1.18以上常见服务部署yaml">k8s集群高版本1.18以上常见服务部署yaml</a><time datetime="2020-12-15T09:09:01.000Z" title="发表于 2020-12-15 17:09:01">2020-12-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/12/15/prometheus-operator%E5%91%8A%E8%AD%A6%E5%9C%BA%E6%99%AF/" title="Prometheus-Operator告警场景"><img src="/img/linuxqie.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Prometheus-Operator告警场景"/></a><div class="content"><a class="title" href="/2020/12/15/prometheus-operator%E5%91%8A%E8%AD%A6%E5%9C%BA%E6%99%AF/" title="Prometheus-Operator告警场景">Prometheus-Operator告警场景</a><time datetime="2020-12-15T09:00:01.000Z" title="发表于 2020-12-15 17:00:01">2020-12-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/08/26/k8s/" title="Kubernetes集群搭建"><img src="/img/linuxqie.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Kubernetes集群搭建"/></a><div class="content"><a class="title" href="/2020/08/26/k8s/" title="Kubernetes集群搭建">Kubernetes集群搭建</a><time datetime="2020-08-26T05:04:01.000Z" title="发表于 2020-08-26 13:04:01">2020-08-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/06/03/jenkins-CICD-k8s/" title="Jenkins持续集成到Kubernetes集群"><img src="/img/jenkins+k8s.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Jenkins持续集成到Kubernetes集群"/></a><div class="content"><a class="title" href="/2020/06/03/jenkins-CICD-k8s/" title="Jenkins持续集成到Kubernetes集群">Jenkins持续集成到Kubernetes集群</a><time datetime="2020-06-03T09:04:01.000Z" title="发表于 2020-06-03 17:04:01">2020-06-03</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/linuxqie.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2021 By huisebug</div><div class="footer_custom_text">huisebug一直奋斗</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

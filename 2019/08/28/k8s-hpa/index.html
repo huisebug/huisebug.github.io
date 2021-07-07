@@ -1,0 +1,304 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kubernetes-hpav2横向自动扩容 | </title><meta name="keywords" content="k8s,hpav2,hpa,custom.metrics,custom-metrics-api"><meta name="author" content="huisebug"><meta name="copyright" content="huisebug"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="这是一个k8s集群验证hpav2的功能">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes-hpav2横向自动扩容">
+<meta property="og:url" content="https://huisebug.github.io/2019/08/28/k8s-hpa/index.html">
+<meta property="og:site_name">
+<meta property="og:description" content="这是一个k8s集群验证hpav2的功能">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://huisebug.github.io/img/head.jpg">
+<meta property="article:published_time" content="2019-08-28T02:04:01.000Z">
+<meta property="article:modified_time" content="2021-07-07T08:50:30.212Z">
+<meta property="article:author" content="huisebug">
+<meta property="article:tag" content="k8s">
+<meta property="article:tag" content="hpav2">
+<meta property="article:tag" content="hpa">
+<meta property="article:tag" content="custom.metrics">
+<meta property="article:tag" content="custom-metrics-api">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://huisebug.github.io/img/head.jpg"><link rel="shortcut icon" href="/img/linuxqie.jpg"><link rel="canonical" href="https://huisebug.github.io/2019/08/28/k8s-hpa/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Kubernetes-hpav2横向自动扩容',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-07-07 16:50:30'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/linuxqie.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">15</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">46</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/download/"><i class="fa-fw fas fa-folder-open"></i><span> download</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/head.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/"></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/download/"><i class="fa-fw fas fa-folder-open"></i><span> download</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Kubernetes-hpav2横向自动扩容</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2019-08-28T02:04:01.000Z" title="发表于 2019-08-28 10:04:01">2019-08-28</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-07-07T08:50:30.212Z" title="更新于 2021-07-07 16:50:30">2021-07-07</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Kubernetes/">Kubernetes</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Kubernetes-hpav2横向自动扩容"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>这是一个k8s集群验证hpav2的功能</p>
+<span id="more"></span>
+
+
+
+<h1 id="HPA"><a href="#HPA" class="headerlink" title="HPA"></a>HPA</h1><ul>
+<li>  Horizo​​ntal Pod Autoscaler根据观察到的CPU利用率自动调整复制控制器，部署或副本集中的pod数量（或者，使用自定义度量标准支持，根据其他一些应用程序提供的度量标准）。请注意，Horizo​​ntal PodAutoscaling不适用于无法缩放的对象，例如DaemonSet。</li>
+<li>  Horizo​​ntal Pod Autoscaler实现为Kubernetes API资源和控制器。资源确定控制器的行为。控制器会定期调整复制控制器或部署中的副本数，以使观察到的平均CPU利用率与用户指定的目标相匹配</li>
+</ul>
+<h2 id="Horizo​​ntal-Pod-Autoscaler如何工作？"><a href="#Horizo​​ntal-Pod-Autoscaler如何工作？" class="headerlink" title="Horizo​​ntal Pod Autoscaler如何工作？"></a>Horizo​​ntal Pod Autoscaler如何工作？</h2><p><img src="/2019/08/28/k8s-hpa/media/7f0680b00596a3a68743a5b0b041da00.png"></p>
+<p>Horizo​​ntal Pod<br>Autoscaler实现为控制循环，其周期由控制器管理器的–horizontal-pod-autoscaler-sync-period标志控制（默认值为15秒）。<br>在每个期间，控制器管理器根据每个Horizo​​ntalPodAutoscaler定义中指定的度量查询资源利用率。控制器管理器从资源指标API（针对每个窗格资源指标）或自定义指标API（针对所有其他指标）获取指标。</p>
+<ul>
+<li>  对于每个pod资源指标（如CPU），控制器从Horizo​​ntalPodAutoscaler所针对的每个pod获取资源指标API中的指标。然后，如果设置了目标利用率值，则控制器将利用率值计算为每个容器中容器上的等效资源请求的百分比。如果设置了目标原始值，则直接使用原始度量标准值。然后，控制器在所有目标pod中获取利用率的平均值或原始值（取决于指定的目标类型），并产生用于缩放所需副本数量的比率。<br>请注意，如果某些pod的容器没有设置相关的资源请求，则不会定义pod的CPU利用率，并且autoscaler不会对该度量标准采取任何操作。有关自动调节算法如何工作的更多信息，请参阅下面的算法详细信息部分。</li>
+<li>  对于每个pod自定义指标，控制器的功能与每个pod资源指标类似，不同之处在于它适用于原始值，而不是使用值。</li>
+<li>  对于对象度量和外部度量，将获取单个度量，该度量描述相关对象。将该度量与目标值进行比较，以产生如上所述的比率。在autoscaling/v2beta2API版本中，可以选择在进行比较之前将此值除以pod的数量。<br>所述Horizo​​ntalPodAutoscaler通常由一系列的API聚集（的获取度量metrics.k8s.io，custom.metrics.k8s.io和external.metrics.k8s.io）。该metrics.k8s.ioAPI通常是通过度量服务器，其需要单独启动提供。有关说明，请参阅<br>metrics-server。Horizo​​ntalPodAutoscaler还可以直接从Heapster获取指标。</li>
+</ul>
+<p><font color="red" size="5">从Kubernetes 1.11开始，不推荐从Heapster获取指标。</font></p>
+<h2 id="算法细节"><a href="#算法细节" class="headerlink" title="算法细节"></a>算法细节</h2><p>从最基本的角度来看，Horizo​​ntal Pod Autoscaler控制器根据所需度量值与当前度量值之间的比率进行操作：<br>desiredReplicas = ceil[currentReplicas * ( currentMetricValue / desiredMetricValue )]</p>
+<ul>
+<li>  例如，如果当前度量标准值是200m，并且期望值是100m，则副本的数量将加倍，因为200.0 / 100.0 == 2.0如果当前值是50m，则我们将副本的数量减半，因为50.0 / 100.0 == 0.5。如果比率足够接近1.0（在全局可配置的容差范围内，从–horizontal-pod-autoscaler-tolerance标志，默认为0.1），我们将跳过缩放。</li>
+<li>  当指定a targetAverageValue或时targetAverageUtilization，currentMetricValue通过在Horizo​​ntalPodAutoscaler的比例目标中获取所有Pod的给定度量的平均值来计算。在检查容差和决定最终值之前，我们考虑了容量准备和缺失指标。</li>
+<li>  设置了删除时间戳的所有Pod（即正在关闭的Pod）和所有失败的Pod都将被丢弃。</li>
+<li>  如果特定的Pod缺少指标，则将其留待以后使用;具有缺失指标的窗格将用于调整最终缩放量。</li>
+<li>  在CPU上进行扩展时，如果任何pod尚未准备好（即它仍在初始化），或者pod的最新度量标准点在它准备就绪之前，那么该pod也会被搁置。</li>
+<li>  由于技术限制，在确定是否预留某些CPU指标时，Horizo​​ntalPodAutoscaler控制器无法准确确定容器第一次准备就绪。相反，它认为Pod尚未准备就绪，如果它尚未准备就绪，并且在它启动后的一个简短，可配置的时间窗口内转换为未准备好。此值使用–horizontal-pod-autoscaler-initial-readiness-delay标志配置，默认值为30秒。一旦pod准备就绪，它会认为任何转换都准备好成为第一个，如果它在启动后的较长的可配置时间内发生的话。此值使用–horizontal-pod-autoscaler-cpu-initialization-period标志配置，默认值为5分钟。</li>
+<li>  所述currentMetricValue / desiredMetricValue然后碱比例是利用剩余的pod没有预留或从上方丢弃计算。</li>
+<li>  如果有任何缺失的指标，我们会更加保守地重新计算平均值，假设这些容量在缩小的情况下消耗100％的期望值，并且在放大的情况下消耗0％。这可以抑制任何潜在规模的大小。</li>
+<li>  此外，如果存在任何尚未准备好的播客，并且我们会扩大规模而不考虑丢失的指标或尚未准备好的播客，我们保守地假设尚未准备好的播客正在消耗所需指标的0％，进一步抑制了规模扩大的程度。</li>
+<li>  考虑到尚未准备好的广告连播和缺少指标后，我们会重新计算使用率。如果新比率反转了比例方向，或者在公差范围内，我们会跳过缩放比例。否则，我们使用新的比例进行扩展。</li>
+<li>  请注意，即使使用新的使用率，也会通过Horizo​​ntalPodAutoscaler状态报告平均利用率的原始值，而不考虑尚未准备好的容器或缺少指标。</li>
+<li>  如果在Horizo​​ntalPodAutoscaler中指定了多个度量标准，则对每个度量标准进行此计算，然后选择所需的最大副本计数。如果任何这些度量标准无法转换为所需的副本计数（例如，由于从度量标准API获取度量标准时出错），则会跳过缩放。</li>
+<li>  最后，在HPA扩展目标之前，记录比例建议。控制器会在可配置窗口中考虑所有建议，从该窗口中选择最高建议。可以使用–horizontal-pod-autoscaler-downscale-stabilization-window标志配置此值，默认为5分钟。这意味着缩放将逐渐发生，平滑快速波动的度量值的影响。</li>
+</ul>
+<p>使用Horizo​​ntal Pod自动缩放器管理一组副本的比例时，由于所评估的度量标准的动态特性，副本数量可能会不断波动。这有时被称为颠簸。<br>从v1.6开始，集群运营商可以通过调整作为kube-controller-manager组件标志公开的全局HPA设置来缓解此问题：<br>从v1.12开始，新的算法更新消除了对高级延迟的需求。<br>–horizontal-pod-autoscaler-downscale-delay：此选项的值是一个持续时间，指定自动缩放器必须等待多长时间才能在当前完成后执行另一个缩减操作。默认值为5分钟（5m0s）。<br>注意：调整这些参数值时，集群操作员应了解可能的后果。如果延迟（冷却）值设置得太长，可能会有人抱怨Horizo​​ntal Pod Autoscaler没有响应工作负载变化。但是，如果延迟值设置得太短，副本集的比例可能会像往常一样保持颠簸。</p>
+<h2 id="支持的API"><a href="#支持的API" class="headerlink" title="支持的API"></a>支持的API</h2><p>默认情况下，Horizo​​ntalPodAutoscaler控制器从一系列API中检索指标。为了使其能够访问这些API，集群管理员必须确保：<br>1.该API汇聚层启用。<br>2.相应的API已注册：</p>
+<ul>
+<li>  对于资源指标，这是metrics.k8s.ioAPI，通常由metrics-server提供。它可以作为群集插件启动。</li>
+<li>  对于自定义指标，这是custom.metrics.k8s.ioAPI。它由度量标准解决方案供应商提供的“适配器”API服务器提供。检查您的指标管道或已知解决方案列表。如果您想自己编写，请查看样板文件以开始使用。</li>
+<li>  对于外部指标，这是external.metrics.k8s.ioAPI。它可能由上面提供的自定义指标适配器提供。</li>
+</ul>
+<p>3.–horizontal-pod-autoscaler-use-rest-clients=true已经在1.12+版本取消。将此设置为false会切换到基于Heapster的自动缩放，不推荐使用。</p>
+<p>官方参考文档链接地址：<br><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/">https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/</a></p>
+<h1 id="HPA-V1"><a href="#HPA-V1" class="headerlink" title="HPA V1"></a>HPA V1</h1><p>v2已经集成v1的功能，所以这里就不演示v1了。<br>最简易的v1，例如下面命令或者yaml示例</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">kubectl autoscale deployment php-apache --cpu-percent=50 --min=1 --max=103</span><br><span class="line"></span><br><span class="line">或</span><br><span class="line"></span><br><span class="line">apiVersion: autoscaling/v1</span><br><span class="line">kind: HorizontalPodAutoscaler</span><br><span class="line">metadata:</span><br><span class="line">  name: php-apache</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  scaleTargetRef:</span><br><span class="line">    apiVersion: apps/v1</span><br><span class="line">    kind: Deployment</span><br><span class="line">    name: php-apache</span><br><span class="line">  minReplicas: 1</span><br><span class="line">  maxReplicas: 10</span><br><span class="line">  targetCPUUtilizationPercentage: 50</span><br></pre></td></tr></table></figure>
+
+<h1 id="HPA-V2"><a href="#HPA-V2" class="headerlink" title="HPA V2 "></a>HPA V2 </h1><p>下面是之前提到的版本问题HPA无法获取内存情况</p>
+<p>参考地址：<br><a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/issues/74704">https://github.com/kubernetes/kubernetes/issues/74704</a></p>
+<p>k8s从v1.7版本开始，对支持自定义指标的HPA架构进行了重新设计，引入了api server aggregation层、<strong>custom metrics server</strong>等组件来实现自定义业务指标的采集、保存和查询、再提供给HPA控制器进行扩缩容决策，称为HPA V2版本；</p>
+<p>首先我们需要给kube-controller-manager服务增加三个参数：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">--horizontal-pod-autoscaler-sync-period=30s \</span><br><span class="line">--horizontal-pod-autoscaler-downscale-delay=3m0s \</span><br><span class="line">--horizontal-pod-autoscaler-upscale-delay=3m0s</span><br></pre></td></tr></table></figure>
+<p>分别是同步时间，缩容时间，扩容时间</p>
+<p>参考修改后的kube-controller-manager服务service文件地址：<br><a target="_blank" rel="noopener" href="https://github.com/huisebug/k8s1.12-Ecosphere/tree/master/hpav2/kube-controller-manager">https://github.com/huisebug/k8s1.12-Ecosphere/tree/master/hpav2/kube-controller-manager</a></p>
+<h2 id="概念解析"><a href="#概念解析" class="headerlink" title="概念解析"></a>概念解析</h2><ul>
+<li>  cluster-autoscaler：kubernetes社区中负责节点水平伸缩的组件，目前处在GA阶段（General Availability，即正式发布的版本）。</li>
+<li>  HPA：kubernetes社区中负责Pod水平伸缩的组件，是所有伸缩组件中历史最悠久的，目前支持autoscaling/v1、autoscaling/v2beta1与autoscaling/v2beta2，其中autoscaling/v1只支持CPU一种伸缩指标，在autoscaling/v2beta1中增加支持custommetrics，在autoscaling/v2beta2中增加支持external metrics。（获取命令kubectlapi-versions）</li>
+<li>  cluster-proportional-autoscaler：根据集群的节点数目，水平调整Pod数目的组件，目前处在GA阶段。</li>
+<li>  vetical-pod-autoscaler：根据Pod的资源利用率、历史数据、异常事件，来动态调整负载的Request值的组件，主要关注在有状态服务、单体应用的资源伸缩场景，目前处在beta阶段。</li>
+<li>  addon-resizer：根据集群中节点的数目，纵向调整负载的Request的组件，目前处在beta阶段。</li>
+</ul>
+<h1 id="Resouce类型（CPU、内存）"><a href="#Resouce类型（CPU、内存）" class="headerlink" title="Resouce类型（CPU、内存）"></a>Resouce类型（CPU、内存）</h1><h2 id="运行原理简析"><a href="#运行原理简析" class="headerlink" title="运行原理简析"></a>运行原理简析</h2><h3 id="扩容"><a href="#扩容" class="headerlink" title="扩容"></a>扩容</h3><p>spec.template.spec.containers.resources.requests来为基数，</p>
+<p>根据pod消耗的cpu数量相加求出平均值，然后除以基数，即可得到当前百分比（current），超出设置的目标百分比（target）就进行扩容，低于就缩容。</p>
+<p><img src="/2019/08/28/k8s-hpa/media/e0767d3a988919bd6df3cf47df01c173.png"></p>
+<p>内存根据pod消耗的内存值相加求出平均值就是当前值（current），与目标值（target）相比较，高于就扩容。</p>
+<h3 id="缩容"><a href="#缩容" class="headerlink" title="缩容"></a>缩容</h3><p>如果是CPU的原因进行了扩容后，CPU消耗百分比低于目标百分比将会进行缩容，此时平均消耗内存除以目标值，如果接近于1就不进行完全的缩容。</p>
+<h2 id="实践探究"><a href="#实践探究" class="headerlink" title="实践探究"></a>实践探究</h2><h3 id="部署mysql-rc服务"><a href="#部署mysql-rc服务" class="headerlink" title="部署mysql-rc服务"></a>部署mysql-rc服务</h3><p>yaml文件参考地址：<br><a target="_blank" rel="noopener" href="https://github.com/huisebug/k8s1.12-Ecosphere/tree/master/hpav2/mysql-rc">https://github.com/huisebug/k8s1.12-Ecosphere/tree/master/hpav2/mysql-rc</a></p>
+<p>注意，使用hpav2的type: Resource，必须在pod中定义spec.template.spec.containers.resource，否则没有具体的基数。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">kind: ReplicationController</span><br><span class="line">metadata:</span><br><span class="line">  name: mysql-rc</span><br><span class="line">  labels:</span><br><span class="line">    name: mysql-rc</span><br><span class="line">spec:</span><br><span class="line">  replicas: 1</span><br><span class="line">  selector:</span><br><span class="line">    name: mysql-pod</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels: </span><br><span class="line">        name: mysql-pod</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">      - name: mysql</span><br><span class="line">        image: mysql</span><br><span class="line">        imagePullPolicy: IfNotPresent</span><br><span class="line">        ports:</span><br><span class="line">        - containerPort: 3306</span><br><span class="line">        env:</span><br><span class="line">        - name: MYSQL_ROOT_PASSWORD</span><br><span class="line">          value: &quot;mysql&quot;</span><br><span class="line">        resources:</span><br><span class="line">          requests:</span><br><span class="line">            cpu: 200m</span><br><span class="line">            memory: 500Mi</span><br><span class="line">          limits:</span><br><span class="line">            cpu: 400m</span><br><span class="line">            memory: 1000Mi</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: autoscaling/v2beta1</span><br><span class="line">kind: HorizontalPodAutoscaler</span><br><span class="line">metadata:</span><br><span class="line">  name: mysql-rc</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  scaleTargetRef:</span><br><span class="line">    apiVersion: v1</span><br><span class="line">    kind: ReplicationController</span><br><span class="line">    name: mysql-rc</span><br><span class="line">  minReplicas: 1</span><br><span class="line">  maxReplicas: 3</span><br><span class="line">  metrics:</span><br><span class="line">  - type: Resource</span><br><span class="line">    resource:</span><br><span class="line">      name: cpu</span><br><span class="line">      targetAverageUtilization: 80</span><br><span class="line">  - type: Resource</span><br><span class="line">    resource:</span><br><span class="line">      name: memory</span><br><span class="line">      targetAverageValue: 1300Mi</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>| <strong>指示</strong>                                                                                                                                                                                                                                                                                                                                                                                                                 | <strong>描述</strong>                                                                                             |<br>| apiVersion: autoscaling/v2beta1                                                                                                                                                                                                                                                                                                                                                                                          | autoscaling正在使用的Kubernetes API组的版本。此示例清单使用beta版本，因此启用了按CPU和内存进行扩展。 |<br>| name: mysql-rc                                                                                                                                                                                                                                                                                                                                                                                                           | 表示HPA正在为mysql-rc部署执行自动扩展。                                                              |<br>| minReplicas: 1                                                                                                                                                                                                                                                                                                                                                                                                           | 表示运行的最小副本数不能低于1。                                                                      |<br>| maxReplicas: 3                                                                                                                                                                                                                                                                                                                                                                                                           | 表示部署中最大副本数不能超过3。                                                                      |<br>| targetAverageUtilization: 80                                                                                                                                                                                                                                                                                                                                                                                             | 表示当平均运行pod使用超过其请求CPU的80％时，部署将扩展pod。                                          |<br>| targetAverageValue: 1300Mi                                                                                                                                                                                                                                                                                                                                                                                               | 表示当平均运行pod使用超过1300Mi的内存时，部署将扩展pod。   </p>
+<h3 id="验证效果"><a href="#验证效果" class="headerlink" title="验证效果"></a>验证效果</h3><h4 id="部署结果"><a href="#部署结果" class="headerlink" title="部署结果"></a>部署结果</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pod -l name=mysql-pod</span><br></pre></td></tr></table></figure>
+<p><img src="/2019/08/28/k8s-hpa/media/e84b6ee5dfdb84f117bd0030afcaeb5f.png"></p>
+<h5 id="CPU扩容"><a href="#CPU扩容" class="headerlink" title="CPU扩容"></a>CPU扩容</h5><p>进入pod中的容器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl exec -it mysql-rc-9ngzn bash</span><br></pre></td></tr></table></figure>
+<p>使CPU满载</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">for i in `seq 1 $(cat /proc/cpuinfo |grep &quot;physical id&quot; |wc -l)`; do dd if=/dev/zero of=/dev/null &amp; done</span><br></pre></td></tr></table></figure>
+<p><img src="/2019/08/28/k8s-hpa/media/f3cfd616d9da177d177ee2c9fc2ae2a3.png"></p>
+<p>查看扩容情况，之前设定了扩容间隔时间（–horizontal-pod-autoscaler-upscale-delay=3m0s）为3m0s。所以我们需要等待大约3分钟<br><img src="/2019/08/28/k8s-hpa/media/6a37a76bf2228f35abf66c662b09611d.png"></p>
+<h4 id="CPU缩容"><a href="#CPU缩容" class="headerlink" title="CPU缩容"></a>CPU缩容</h4><p>杀死容器进程1，即会重启容器，然后增压CPU的循环将会停止，以达到CPU的负载就会将下来，然后进行缩容。</p>
+<h5 id="内存不影响的情况下"><a href="#内存不影响的情况下" class="headerlink" title="内存不影响的情况下"></a>内存不影响的情况下</h5><p><img src="/2019/08/28/k8s-hpa/media/7a6bbf5f1793439be51cd86d098d4c93.png"></p>
+<h5 id="内存影响情况下"><a href="#内存影响情况下" class="headerlink" title="内存影响情况下"></a>内存影响情况下</h5><p>此处的mysql稳定运行消耗的内存为500Mi左右，为了让其缩容比例接近于1，以达到扩容后，就算CPU消耗降下来，因为内存的current/target接近于1，不会完全的缩容到最小副本数。</p>
+<p>参考yaml文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete hpa mysql-rc</span><br><span class="line">kubectl apply -f https://raw.githubusercontent.com/huisebug/k8s1.12-Ecosphere/master/hpav2/mysql-rc/mysql-rc-hpa-memory.yaml</span><br></pre></td></tr></table></figure>
+<p>测试步骤和上面一样</p>
+<p><img src="/2019/08/28/k8s-hpa/media/cbfc06e94c4af731f1f9f7207ba61625.png"><br><img src="/2019/08/28/k8s-hpa/media/89b5f8e71844f2be704b4a02db5cc63f.png"><br><img src="/2019/08/28/k8s-hpa/media/7f6102e660fd454b4c74346e6564f26c.png"><br><img src="/2019/08/28/k8s-hpa/media/361a0e5c157f9d9b7588e62b5183451c.png"></p>
+<p>此时pod数量将会缩减为2，所以目标值的设定可以经过实际场景数据进行分析。</p>
+<p><img src="/2019/08/28/k8s-hpa/media/4ac56712cd4cdd18505e63a4d45a776b.png"></p>
+<h1 id="建立custom-metrics-k8s-io"><a href="#建立custom-metrics-k8s-io" class="headerlink" title="建立custom.metrics.k8s.io"></a>建立custom.metrics.k8s.io</h1><p>使用HPA v2的type为Resource时，使用的api是metrics.k8s.io，这个是由metrics-server提供的，使用type为Pods和Object时就需要使用的api是custom.metrics.k8s.io；</p>
+<p>其中的Custom Metrics Server由prometheus-adapter服务实现，这个服务在之前我们安装prometheus-operator服务的时候已经安装。但是其安装的是api：metrics.k8s.io，并且其功能并不满足。所以在metrics-server1.12已经将api：metrics.k8s.io移除并使用metrics-server来提供支持。并且移除了prometheus-adapter服务。</p>
+<p>github上有位大神的方法可以成功，参考地址如下，并且里面也有metrics-server的安装和验证</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/stefanprodan/k8s-prom-hpa</span><br></pre></td></tr></table></figure>
+<p>需要修改镜像地址为可拉取的，可参考我修改了的</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/huisebug/k8s1.12-Ecosphere/tree/master/hpav2/k8s-prom-hpa">https://github.com/huisebug/k8s1.12-Ecosphere/tree/master/hpav2/k8s-prom-hpa</a></p>
+<h2 id="部署Prometheus和Prometheus-adapter"><a href="#部署Prometheus和Prometheus-adapter" class="headerlink" title="部署Prometheus和Prometheus-adapter"></a>部署Prometheus和Prometheus-adapter</h2><p>创建monitoring命名空间：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl create -f ./namespaces.yaml</span><br></pre></td></tr></table></figure>
+<p>在monitoring命名空间中部署Prometheus v2 ：</p>
+<p>如果要部署到GKE，可能会收到错误消息：<em>Error from server (Forbidden): error when<br>creating</em> 这将帮助您解决该问题：<a target="_blank" rel="noopener" href="https://github.com/coreos/prometheus-operator/blob/master/Documentation/troubleshooting.md">GKE上的RBAC</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl create -f ./prometheus</span><br></pre></td></tr></table></figure>
+<p>生成Prometheus适配器所需的TLS证书：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make certs</span><br></pre></td></tr></table></figure>
+<p>部署Prometheus自定义指标API适配器：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl create -f ./custom-metrics-api</span><br></pre></td></tr></table></figure>
+<h2 id="验证并访问api"><a href="#验证并访问api" class="headerlink" title="验证并访问api"></a>验证并访问api</h2><p>查看pod是否成功建立</p>
+<p><img src="/2019/08/28/k8s-hpa/media/e2613a17ecea2aff0b5b982038589066.png"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl api-versions | grep custom.metrics.k8s.io</span><br></pre></td></tr></table></figure>
+<p><img src="/2019/08/28/k8s-hpa/media/b5822b1159f9adaf1733c956398a013a.png"></p>
+<p>安装jQuery插件，并将请求值转换为json</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">yum install epel-release</span><br><span class="line">yum list jq</span><br><span class="line">yum -y install jq</span><br></pre></td></tr></table></figure>
+<p>获取monitoring命名空间中所有pod的FS使用情况：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw &quot;/apis/custom.metrics.k8s.io/v1beta1/namespaces/monitoring/pods/*/fs_usage_bytes&quot; | jq .</span><br></pre></td></tr></table></figure>
+<p><img src="/2019/08/28/k8s-hpa/media/7b630add30ef6652a3943add8fced092.png"></p>
+<h1 id="Pods类型"><a href="#Pods类型" class="headerlink" title="Pods类型"></a>Pods类型</h1><h2 id="创建Pod"><a href="#创建Pod" class="headerlink" title="创建Pod"></a>创建Pod</h2><p>依照项目k8s-prom-hpa中的podinfo文件目录下来验证。</p>
+<p>podinfo在default命名空间中创建NodePort服务和部署</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl create -f ./podinfo/podinfo-svc.yaml ./podinfo/podinfo-dep.yaml</span><br></pre></td></tr></table></figure>
+<p>该podinfo应用程序公开名为的自定义指标http_requests_total。Prometheus适配器删除_total后缀并将度量标记为计数器度量标准。</p>
+<p>从自定义指标API获取每秒的总请求数：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw &quot;/apis/custom.metrics.k8s.io/v1beta1/namespaces/default/pods/*/http_requests&quot; | jq .</span><br></pre></td></tr></table></figure>
+<p><img src="/2019/08/28/k8s-hpa/media/534de9c48f8f9c01da152a780cdc9368.png"></p>
+<p>注意：如果想让prometheus从pod抓取数据，需要在template声明annotations:中添加 prometheus.io/scrape: ‘true’</p>
+<p><img src="/2019/08/28/k8s-hpa/media/a12b92db5f89feb0b1cbe01263e182bf.png"></p>
+<h2 id="创建HPA"><a href="#创建HPA" class="headerlink" title="创建HPA"></a>创建HPA</h2><p>podinfo如果请求数超过每秒10个，将扩展部署</p>
+<p>podinfo在default命名空间中部署HPA</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f ./podinfo/podinfo-hpa-custom.yaml</span><br></pre></td></tr></table></figure>
+<p><img src="/2019/08/28/k8s-hpa/media/e27e33e324df09caaaf3748ccd82891c.png"></p>
+<p>注意：不加m的时候，单位的默认是n<em>1000m，即上面是10</em>1000m=10000m</p>
+<h2 id="安装-hey-压力测试工具"><a href="#安装-hey-压力测试工具" class="headerlink" title="安装 hey 压力测试工具"></a>安装 hey 压力测试工具</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker run -dit -v /usr/local/bin:/go/bin golang:1.8 go get github.com/rakyll/hey</span><br><span class="line">export APP_ENDPOINT=$(kubectl get svc podinfo -o template --template &#123;&#123;.spec.clusterIP&#125;&#125;); echo $&#123;APP_ENDPOINT&#125;</span><br><span class="line">export APP_ENDPOINT_PORT=$(kubectl get svc podinfo -o yaml | grep port: | awk -F &#x27;: &#x27; &#x27;&#123;print $2&#125;&#x27;); </span><br><span class="line">echo $&#123;APP_ENDPOINT_PORT&#125;</span><br><span class="line">hey -n 10000 -q 5 -c 5</span><br></pre></td></tr></table></figure>
+<p>执行请求测试后，可以看到pod数量变为了3</p>
+<p><img src="/2019/08/28/k8s-hpa/media/721ddf000a950a306e7419edc8437ea4.png"></p>
+<p>增大请求，pod数量变成4，停止后等待大约3分钟就可以缩容到最小副本数</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hey -n 50000 -q 5 -c 5</span><br></pre></td></tr></table></figure>
+<p><img src="/2019/08/28/k8s-hpa/media/77b90e208755d72445e6ac4a5f952679.png"><br><img src="/2019/08/28/k8s-hpa/media/f859ae2a4ddc72caba3a0fede4f0c88a.png"></p>
+<h1 id="Object类型"><a href="#Object类型" class="headerlink" title="Object类型"></a>Object类型</h1><p>可支持的数据来源可以是service、endpoint等。</p>
+<p>暂时无法实现，分析原因是需要在prometheus-adapter的配置文件中定义service，因为prometheus可以在service中声明annotations:中添加<br>prometheus.io/scrape: ‘true’</p>
+<p>是可以获取到的metrics的，可是在api就无法访问到。</p>
+<p>参考yaml：<br><a target="_blank" rel="noopener" href="https://github.com/huisebug/k8s1.12-Ecosphere/tree/master/hpav2/sample-metrics">https://github.com/huisebug/k8s1.12-Ecosphere/tree/master/hpav2/sample-metrics</a></p>
+<h1 id="失败"><a href="#失败" class="headerlink" title="失败"></a>失败</h1><h2 id="部署prometheus"><a href="#部署prometheus" class="headerlink" title="部署prometheus"></a>部署prometheus</h2><p>参考我的values-hpav2.yaml文件地址：<br><a target="_blank" rel="noopener" href="https://github.com/huisebug/k8s1.12-Ecosphere/tree/master/hpav2/prometheus">https://github.com/huisebug/k8s1.12-Ecosphere/tree/master/hpav2/prometheus</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> helm delete prometheushpa --purge</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> helm install --name prometheushpa --namespace kube-system \</span></span><br><span class="line"><span class="bash">/root/charts/stable/prometheus \</span></span><br><span class="line"><span class="bash">-f /root/charts/stable/prometheus/values-hpav2.yaml</span></span><br></pre></td></tr></table></figure>
+<p>部署的服务如下：</p>
+<ul>
+<li>  关闭告警插件alertmanager</li>
+<li>  关闭节点收集器nodeexporter</li>
+<li>  关闭网关pushgateway</li>
+<li>  开启deployment收集器kubestatemetrics</li>
+<li>  开启prometheus</li>
+</ul>
+<p>注意：我为方便与prometheus-operator安装prometheus区分，将服务命名为prometheushpa</p>
+<h2 id="部署prometheus-adapter"><a href="#部署prometheus-adapter" class="headerlink" title="部署prometheus-adapter"></a>部署prometheus-adapter</h2><p>参考我的values-hpav2.yaml文件地址：<br><a target="_blank" rel="noopener" href="https://github.com/huisebug/k8s1.12-Ecosphere/tree/master/hpav2/prometheus-adapter">https://github.com/huisebug/k8s1.12-Ecosphere/tree/master/hpav2/prometheus-adapter</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> helm delete prometheus-adapter --purge</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> helm install --name prometheus-adapter --namespace kube-system \</span></span><br><span class="line"><span class="bash">/root/charts/stable/prometheus-adapter \</span></span><br><span class="line"><span class="bash">-f /root/charts/stable/prometheus-adapter/values-hpav2.yaml</span></span><br></pre></td></tr></table></figure>
+<p>注意：prometheus-adapter去连接prometheushpa时，helm方式安装的prometheus的service port是80，不是9090；当然你可以修改为9090</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">huisebug</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://huisebug.github.io/2019/08/28/k8s-hpa/">https://huisebug.github.io/2019/08/28/k8s-hpa/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://huisebug.github.io" target="_blank"></a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/k8s/">k8s</a><a class="post-meta__tags" href="/tags/hpav2/">hpav2</a><a class="post-meta__tags" href="/tags/hpa/">hpa</a><a class="post-meta__tags" href="/tags/custom-metrics/">custom.metrics</a><a class="post-meta__tags" href="/tags/custom-metrics-api/">custom-metrics-api</a></div><div class="post_share"><div class="social-share" data-image="/img/head.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button button--animated"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/img/wechat.jpg" target="_blank"><img class="post-qr-code-img" src="/img/wechat.jpg" alt="wechat"/></a><div class="post-qr-code-desc">wechat</div></li><li class="reward-item"><a href="/img/alipay.jpg" target="_blank"><img class="post-qr-code-img" src="/img/alipay.jpg" alt="alipay"/></a><div class="post-qr-code-desc">alipay</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2020/06/03/jenkins-CICD-k8s/"><img class="prev-cover" src="/img/jenkins+k8s.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Jenkins持续集成到Kubernetes集群</div></div></a></div><div class="next-post pull-right"><a href="/2019/08/27/Prometheus-Operator/"><img class="next-cover" src="/img/head.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Prometheus-Operator监控k8s</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2020/08/26/k8s/" title="Kubernetes集群搭建"><img class="cover" src="/img/linuxqie.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-08-26</div><div class="title">Kubernetes集群搭建</div></div></a></div><div><a href="/2018/09/06/k8s常见方法及错误解决/" title="持续更新-20190306-k8s常见方法及错误解决"><img class="cover" src="/img/linuxqie.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-09-06</div><div class="title">持续更新-20190306-k8s常见方法及错误解决</div></div></a></div><div><a href="/2020/12/15/k8s高版本服务部署yaml/" title="k8s集群高版本1.18以上常见服务部署yaml"><img class="cover" src="/img/linuxqie.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-15</div><div class="title">k8s集群高版本1.18以上常见服务部署yaml</div></div></a></div><div><a href="/2021/07/06/kata容器的一些分享/" title="kata容器的一些分享"><img class="cover" src="/img/kata.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-07-06</div><div class="title">kata容器的一些分享</div></div></a></div><div><a href="/2020/12/15/prometheus-operator告警场景/" title="Prometheus-Operator告警场景"><img class="cover" src="/img/linuxqie.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-15</div><div class="title">Prometheus-Operator告警场景</div></div></a></div><div><a href="/2019/08/27/Prometheus-Operator/" title="Prometheus-Operator监控k8s"><img class="cover" src="/img/head.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-08-27</div><div class="title">Prometheus-Operator监控k8s</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/linuxqie.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">huisebug</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">15</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">46</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/huisebug" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:huisebug@outlook.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">记录容器生活</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#HPA"><span class="toc-number">1.</span> <span class="toc-text">HPA</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Horizo%E2%80%8B%E2%80%8Bntal-Pod-Autoscaler%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C%EF%BC%9F"><span class="toc-number">1.1.</span> <span class="toc-text">Horizo​​ntal Pod Autoscaler如何工作？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%97%E6%B3%95%E7%BB%86%E8%8A%82"><span class="toc-number">1.2.</span> <span class="toc-text">算法细节</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%94%AF%E6%8C%81%E7%9A%84API"><span class="toc-number">1.3.</span> <span class="toc-text">支持的API</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#HPA-V1"><span class="toc-number">2.</span> <span class="toc-text">HPA V1</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#HPA-V2"><span class="toc-number">3.</span> <span class="toc-text">HPA V2 </span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E5%BF%B5%E8%A7%A3%E6%9E%90"><span class="toc-number">3.1.</span> <span class="toc-text">概念解析</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Resouce%E7%B1%BB%E5%9E%8B%EF%BC%88CPU%E3%80%81%E5%86%85%E5%AD%98%EF%BC%89"><span class="toc-number">4.</span> <span class="toc-text">Resouce类型（CPU、内存）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E5%8E%9F%E7%90%86%E7%AE%80%E6%9E%90"><span class="toc-number">4.1.</span> <span class="toc-text">运行原理简析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A9%E5%AE%B9"><span class="toc-number">4.1.1.</span> <span class="toc-text">扩容</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%A9%E5%AE%B9"><span class="toc-number">4.1.2.</span> <span class="toc-text">缩容</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E8%B7%B5%E6%8E%A2%E7%A9%B6"><span class="toc-number">4.2.</span> <span class="toc-text">实践探究</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%83%A8%E7%BD%B2mysql-rc%E6%9C%8D%E5%8A%A1"><span class="toc-number">4.2.1.</span> <span class="toc-text">部署mysql-rc服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81%E6%95%88%E6%9E%9C"><span class="toc-number">4.2.2.</span> <span class="toc-text">验证效果</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%83%A8%E7%BD%B2%E7%BB%93%E6%9E%9C"><span class="toc-number">4.2.2.1.</span> <span class="toc-text">部署结果</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#CPU%E6%89%A9%E5%AE%B9"><span class="toc-number">4.2.2.1.1.</span> <span class="toc-text">CPU扩容</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#CPU%E7%BC%A9%E5%AE%B9"><span class="toc-number">4.2.2.2.</span> <span class="toc-text">CPU缩容</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E4%B8%8D%E5%BD%B1%E5%93%8D%E7%9A%84%E6%83%85%E5%86%B5%E4%B8%8B"><span class="toc-number">4.2.2.2.1.</span> <span class="toc-text">内存不影响的情况下</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E5%BD%B1%E5%93%8D%E6%83%85%E5%86%B5%E4%B8%8B"><span class="toc-number">4.2.2.2.2.</span> <span class="toc-text">内存影响情况下</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BB%BA%E7%AB%8Bcustom-metrics-k8s-io"><span class="toc-number">5.</span> <span class="toc-text">建立custom.metrics.k8s.io</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%83%A8%E7%BD%B2Prometheus%E5%92%8CPrometheus-adapter"><span class="toc-number">5.1.</span> <span class="toc-text">部署Prometheus和Prometheus-adapter</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81%E5%B9%B6%E8%AE%BF%E9%97%AEapi"><span class="toc-number">5.2.</span> <span class="toc-text">验证并访问api</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Pods%E7%B1%BB%E5%9E%8B"><span class="toc-number">6.</span> <span class="toc-text">Pods类型</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BAPod"><span class="toc-number">6.1.</span> <span class="toc-text">创建Pod</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BAHPA"><span class="toc-number">6.2.</span> <span class="toc-text">创建HPA</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-hey-%E5%8E%8B%E5%8A%9B%E6%B5%8B%E8%AF%95%E5%B7%A5%E5%85%B7"><span class="toc-number">6.3.</span> <span class="toc-text">安装 hey 压力测试工具</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Object%E7%B1%BB%E5%9E%8B"><span class="toc-number">7.</span> <span class="toc-text">Object类型</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A4%B1%E8%B4%A5"><span class="toc-number">8.</span> <span class="toc-text">失败</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%83%A8%E7%BD%B2prometheus"><span class="toc-number">8.1.</span> <span class="toc-text">部署prometheus</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%83%A8%E7%BD%B2prometheus-adapter"><span class="toc-number">8.2.</span> <span class="toc-text">部署prometheus-adapter</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/07/06/kata%E5%AE%B9%E5%99%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E5%88%86%E4%BA%AB/" title="kata容器的一些分享"><img src="/img/kata.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="kata容器的一些分享"/></a><div class="content"><a class="title" href="/2021/07/06/kata%E5%AE%B9%E5%99%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E5%88%86%E4%BA%AB/" title="kata容器的一些分享">kata容器的一些分享</a><time datetime="2021-07-06T06:04:01.000Z" title="发表于 2021-07-06 14:04:01">2021-07-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/12/15/k8s%E9%AB%98%E7%89%88%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2yaml/" title="k8s集群高版本1.18以上常见服务部署yaml"><img src="/img/linuxqie.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="k8s集群高版本1.18以上常见服务部署yaml"/></a><div class="content"><a class="title" href="/2020/12/15/k8s%E9%AB%98%E7%89%88%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2yaml/" title="k8s集群高版本1.18以上常见服务部署yaml">k8s集群高版本1.18以上常见服务部署yaml</a><time datetime="2020-12-15T09:09:01.000Z" title="发表于 2020-12-15 17:09:01">2020-12-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/12/15/prometheus-operator%E5%91%8A%E8%AD%A6%E5%9C%BA%E6%99%AF/" title="Prometheus-Operator告警场景"><img src="/img/linuxqie.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Prometheus-Operator告警场景"/></a><div class="content"><a class="title" href="/2020/12/15/prometheus-operator%E5%91%8A%E8%AD%A6%E5%9C%BA%E6%99%AF/" title="Prometheus-Operator告警场景">Prometheus-Operator告警场景</a><time datetime="2020-12-15T09:00:01.000Z" title="发表于 2020-12-15 17:00:01">2020-12-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/08/26/k8s/" title="Kubernetes集群搭建"><img src="/img/linuxqie.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Kubernetes集群搭建"/></a><div class="content"><a class="title" href="/2020/08/26/k8s/" title="Kubernetes集群搭建">Kubernetes集群搭建</a><time datetime="2020-08-26T05:04:01.000Z" title="发表于 2020-08-26 13:04:01">2020-08-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/06/03/jenkins-CICD-k8s/" title="Jenkins持续集成到Kubernetes集群"><img src="/img/jenkins+k8s.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Jenkins持续集成到Kubernetes集群"/></a><div class="content"><a class="title" href="/2020/06/03/jenkins-CICD-k8s/" title="Jenkins持续集成到Kubernetes集群">Jenkins持续集成到Kubernetes集群</a><time datetime="2020-06-03T09:04:01.000Z" title="发表于 2020-06-03 17:04:01">2020-06-03</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/head.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2021 By huisebug</div><div class="footer_custom_text">huisebug一直奋斗</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
