@@ -222,7 +222,8 @@
 <p>create: 创建容器,这里需要先创建sandbox,获取sandbox容器的id后,再用此id创建业务容器</p>
 <p>inspect: 列出业务容器状态</p>
 <p>inspectp: 列出sandbox容器状态</p>
-<p>crictl 是cri的控制命令<br>因为暂时还未完全舍弃docker，所以docker.sock是排在第一位的，指定使用containerd.sock<br>crictl -r unix:///run/containerd/containerd.sock  images</p>
+<p>crictl 是cri的控制命令<br>因为暂时还未完全舍弃docker，所以docker.sock是排在第一位的，指定使用containerd.sock</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">crictl -r unix:///run/containerd/containerd.sock  images</span><br></pre></td></tr></table></figure>
 <p>ctr指定命名空间必须跟在ctr命令后面</p>
 <p>crictl所做的操作是在ctr 的 k8s.io命名空间下<br>例如镜像， crictl -r unix:///run/containerd/containerd.sock images 和 ctr -n k8s.io i ls<br>docker所做的操作是在ctr的moby命名空间下，例如docker正在运行的容器，docker ps 和 ctr -n moby t ls，镜像不是一致的<br>crictl使用镜像docker.io仓库的镜像不用写全名</p>
 <p>containerd配置文件/etc/containerd/config.toml所做的修改是给k8s（或者说是crictl命令使用）使用，可以利用下面的命令看到当前containerd基于k8s的配置</p>
