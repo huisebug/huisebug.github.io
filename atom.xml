@@ -67,36 +67,6 @@
   </entry>
   
   <entry>
-    <title>k8s服务部署</title>
-    <link href="https://huisebug.github.io/2021/04/19/download/"/>
-    <id>https://huisebug.github.io/2021/04/19/download/</id>
-    <published>2021-04-19T06:04:01.000Z</published>
-    <updated>2021-08-03T08:04:01.000Z</updated>
-    
-    <content type="html"><![CDATA[<span id="more"></span><hr><p>title: download<br>date: 2021-07-07 16:55:30</p><hr><p><a href="/download/nfsclient-provisioner.zip">nfs动态pv</a> : 记得修改其中的nfs地址为你的nfs服务地址,并且k8s1.20+和k8s1.20-使用的镜像有所不同，执行命令kubectl apply -f . -n kube-system<br><a href="/download/metrics-server.zip">metrics-server</a> :  直接运行即可<br><a href="/download/nginx-ingress.zip">nginx-ingress</a> : 执行时使用kubectl apply -f /* -n kube-system<br><a href="/download/sentinelredis-cluster-ha.zip">sentinelredis-高可用</a> : 里面是使用了nfs动态pv来进行持久化，确保集群中已经运行nfs动态pv<br><a href="/download/rabbitmq-cluster.zip">rabbitmq集群</a> : 里面是使用了nfs动态pv来进行持久化，确保集群中已经运行nfs动态pv<br><a href="/download/mongodb-cluster.zip">mongodb集群</a> : 里面是使用了nfs动态pv来进行持久化，确保集群中已经运行nfs动态pv，集群是rs集群，由2个node(1个secondary和1个primary )+arbiter组成<br><a href="/download/elasticsearch6-cluster.zip">elasticsearch6集群</a> : 里面是使用了nfs动态pv来进行持久化，确保集群中已经运行nfs动态pv<br><a href="/download/elasticsearch7-cluster.zip">elasticsearch7集群</a> : 里面是使用了nfs动态pv来进行持久化，确保集群中已经运行nfs动态pv</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;span id=&quot;more&quot;&gt;&lt;/span&gt;
-
-
-&lt;hr&gt;
-&lt;p&gt;title: download&lt;br&gt;date: 2021-07-07 16:55:30&lt;/p&gt;
-&lt;hr&gt;
-&lt;p&gt;&lt;a href=&quot;/download/nfsclient-provisioner.zip&quot;&gt;nfs</summary>
-      
-    
-    
-    
-    <category term="k8s" scheme="https://huisebug.github.io/categories/k8s/"/>
-    
-    
-    <category term="containerd" scheme="https://huisebug.github.io/tags/containerd/"/>
-    
-  </entry>
-  
-  <entry>
     <title>k8s集群高版本1.18以上常见服务部署yaml</title>
     <link href="https://huisebug.github.io/2020/12/15/k8s%E9%AB%98%E7%89%88%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2yaml/"/>
     <id>https://huisebug.github.io/2020/12/15/k8s%E9%AB%98%E7%89%88%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2yaml/</id>
