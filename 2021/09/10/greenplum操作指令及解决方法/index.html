@@ -1,0 +1,246 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>greenplum操作指令及解决方法 | huisebug</title><meta name="keywords" content="greenplum"><meta name="author" content="huisebug"><meta name="copyright" content="huisebug"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="gp集群如何部署就不过多介绍，主要是结合一下工作中要用到的指令和遇到的一些坑">
+<meta property="og:type" content="article">
+<meta property="og:title" content="greenplum操作指令及解决方法">
+<meta property="og:url" content="https://huisebug.github.io/2021/09/10/greenplum%E6%93%8D%E4%BD%9C%E6%8C%87%E4%BB%A4%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/index.html">
+<meta property="og:site_name" content="huisebug">
+<meta property="og:description" content="gp集群如何部署就不过多介绍，主要是结合一下工作中要用到的指令和遇到的一些坑">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://huisebug.github.io/img/greenplum.jpg">
+<meta property="article:published_time" content="2021-09-10T02:04:01.000Z">
+<meta property="article:modified_time" content="2021-09-10T02:04:01.000Z">
+<meta property="article:author" content="huisebug">
+<meta property="article:tag" content="greenplum">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://huisebug.github.io/img/greenplum.jpg"><link rel="shortcut icon" href="/img/linuxqie.jpg"><link rel="canonical" href="https://huisebug.github.io/2021/09/10/greenplum%E6%93%8D%E4%BD%9C%E6%8C%87%E4%BB%A4%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: huisebug","link":"链接: ","source":"来源: huisebug","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'greenplum操作指令及解决方法',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-09-10 10:04:01'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="huisebug" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/linuxqie.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">17</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">47</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/download/"><i class="fa-fw fas fa-folder-open"></i><span> Download</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/greenplum.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">huisebug</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/download/"><i class="fa-fw fas fa-folder-open"></i><span> Download</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">greenplum操作指令及解决方法</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-09-10T02:04:01.000Z" title="发表于 2021-09-10 10:04:01">2021-09-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-09-10T02:04:01.000Z" title="更新于 2021-09-10 10:04:01">2021-09-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="greenplum操作指令及解决方法"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>gp集群如何部署就不过多介绍，主要是结合一下工作中要用到的指令和遇到的一些坑</p>
+<span id="more"></span>
+
+<h1 id="操作规范"><a href="#操作规范" class="headerlink" title="操作规范"></a>操作规范</h1><p>gp集群的所有操作都是由master节点进行的,由master机器ssh到其他节点上进行自动化操作</p>
+<p>安装部署gp集群时已经给master角色机器和standby角色机器添加了gpadmin用户.bashrc脚本</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;&quot;&quot;</span><br><span class="line">source /usr/local/greenplum-db/greenplum_path.sh</span><br><span class="line">export MASTER_DATA_DIRECTORY=/data/master/gpseg-1</span><br><span class="line">&quot;&quot;&quot; &gt;&gt; /home/gpadmin/.bashrc</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>必须在gpadmin用户下进行,登录master机器后需要切换到gpadmin用户下</p>
+<p>su – gpadmin</p>
+<p>下面的所有操作都是在gpadmin用户下的操作</p>
+<h1 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h1><p>恢复mirror segment (primary复制到mirror)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gprecoverseg -qo ./recov</span><br><span class="line">gprecoverseg -i ./recov</span><br></pre></td></tr></table></figure>
+<p>恢复到原来初始化时的角色设置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gprecoverseg -r</span><br></pre></td></tr></table></figure>
+<p>恢复primary segment (mirror复制到primary)</p>
+<p>快速恢复镜像，可以多次执行，让集群中的mirror端口7000的数据同步到primary端口6000，可以用于segment节点宕机后重新启动，期间可能修复失败，多次执行修复即可。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gprecoverseg -av #不会创建primary数据目录</span><br></pre></td></tr></table></figure>
+<p>强制恢复</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gprecoverseg -Fav #会创建primary数据目录，（相当于把mirror的整个文件目录给复制到primary目录）</span><br></pre></td></tr></table></figure>
+<p>启动master节点和segment</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gpstart -a</span><br></pre></td></tr></table></figure>
+<p>显示具有镜像状态问题的片段，如果集群正常则显示为running，可用于健康检查</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gpstate -e</span><br></pre></td></tr></table></figure>
+<p>查看端口分配情况</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gpstate -p</span><br></pre></td></tr></table></figure>
+<p>查看集群中的角色</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gpstate -b</span><br></pre></td></tr></table></figure>
+<p>显示主镜像mirror映射</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gpstate -c</span><br></pre></td></tr></table></figure>
+<p>显示镜像实例同步状态</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gpstate -m</span><br></pre></td></tr></table></figure>
+<p>停止所有实例，然后重启系统</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gpstop -M fast -ar</span><br></pre></td></tr></table></figure>
+<p>停止集群，包含master和segment</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gpstop -a</span><br></pre></td></tr></table></figure>
+<p>激活standby为master，在standby机器上执行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gpactivatestandby -a</span><br></pre></td></tr></table></figure>
+<h1 id="Master角色故障转移"><a href="#Master角色故障转移" class="headerlink" title="Master角色故障转移"></a>Master角色故障转移</h1><p>问题场景：</p>
+<p>Master机器故障</p>
+<p>修复方法：</p>
+<p>master机器故障时，无法自动故障转移，需要将standby机器升级为master角色，原有的master机器会被踢出集群master角色，此时集群中只有master角色(standby机器)，没有standby角色。</p>
+<p>操作命令:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">登录standby机器</span></span><br><span class="line">su – gpadmin</span><br><span class="line">gpactivatestandby -a</span><br></pre></td></tr></table></figure>
+
+<p>要想master机器重新成为master角色，需要移除master机器的MASTER_DATA_DIRECTORY目录数据(rm -rf $MASTER_DATA_DIRECTORY)或者备份，然后在standby机器上操作命令：gpinitstandby -s master机器； 让master机器重新以standby角色加入集群：</p>
+<p>操作命令:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">登录master机器</span></span><br><span class="line">rm -rf $MASTER_DATA_DIRECTORY</span><br><span class="line"><span class="meta">#</span><span class="bash">登录standby机器</span></span><br><span class="line">su – gpadmin</span><br><span class="line">gpinitstandby -s master机器主机名</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>操作完成后，master机器就是集群中的standby角色; 经过gpstate -b确认master机器成为了集群的standby角色，然后停止standby机器(pg_ctl stop -D $MASTER_DATA_DIRECTORY)，在master机器上执行gpactivatestandby -a命令，抢夺standby机器的master角色并踢出集群，当master机器重新成为master角色后，再移除standby机器的$MASTER_DATA_DIRECTORY目录数据<br>然后再master机器上执行命令：gpinitstandby -s standby机器。让其成为standby角色。<br>操作命令:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">登录standby机器</span></span><br><span class="line">su – gpadmin</span><br><span class="line">pg_ctl stop -D $MASTER_DATA_DIRECTORY</span><br><span class="line">rm -rf $MASTER_DATA_DIRECTORY</span><br><span class="line"><span class="meta">#</span><span class="bash">登录master机器</span></span><br><span class="line">su – gpadmin</span><br><span class="line">gpactivatestandby -a</span><br><span class="line">gpinitstandby -s standby机器主机名</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="Segment角色故障修复"><a href="#Segment角色故障修复" class="headerlink" title="Segment角色故障修复"></a>Segment角色故障修复</h1><p>问题场景</p>
+<p>segment节点机器重启</p>
+<p>修复方法：</p>
+<p>gp集群自带segment故障转移，故障segment节点的primary业务转移其对应的mirror业务上（一般是其他的segment节点上），此时不影响集群运行。</p>
+<p>gp提供了segment节点修复工具gprecoverseg</p>
+<p>当整个集群正常状态下，primary提供数据读写，mirror提供备份功能，当primary异常时，mirror接替primary的工作。使用命令gpstate -c命令进行查看</p>
+<p>例如：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Status                             Data State     Primary        Datadir           Port   Mirror         Datadir           Port</span><br><span class="line">Primary Active, Mirror Available   Synchronized   gp-mdw1-sdw1   /data/p1/gpseg0   6000   gp-mdw2-sdw2   /data/m1/gpseg0   7000</span><br><span class="line">Primary Active, Mirror Available   Synchronized   gp-mdw1-sdw1   /data/p2/gpseg1   6001   gp-sdw3        /data/m2/gpseg1   7001</span><br><span class="line">Primary Active, Mirror Available   Synchronized   gp-mdw2-sdw2   /data/p1/gpseg2   6000   gp-sdw3        /data/m1/gpseg2   7000</span><br><span class="line">Primary Active, Mirror Available   Synchronized   gp-mdw2-sdw2   /data/p2/gpseg3   6001   gp-mdw1-sdw1   /data/m2/gpseg3   7001</span><br><span class="line">Primary Active, Mirror Available   Synchronized   gp-sdw3        /data/p1/gpseg4   6000   gp-mdw1-sdw1   /data/m1/gpseg4   7000</span><br><span class="line">Primary Active, Mirror Available   Synchronized   gp-sdw3        /data/p2/gpseg5   6001   gp-mdw2-sdw2   /data/m2/gpseg5   7001</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>方法1：</p>
+<p>如果发现上面的Data<br>State不是Synchronized，可以执行自动修复命令gprecoverseg，这条命令会检测集群的运行情况，如果segment节点的服务未启动也会进行启动</p>
+<p>操作命令:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">登录master机器</span></span><br><span class="line">su – gpadmin</span><br><span class="line">gprecoverseg -a   #此命令可以多次执行，可以加上-F 强制进行修复，直到gpsta -c查看到的state正常</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>方法2：:</p>
+<p>查询集群中的问题节点，进行修复</p>
+<p>操作命令:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">登录master机器</span></span><br><span class="line">su – gpadmin</span><br><span class="line">gprecoverseg -qo ./recov     #查询集群中需要修复的节点，将内容写入到文件recov</span><br><span class="line">gprecoverseg -i ./recov     #读取recov文件中需要修复的节点</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="集群无法启动"><a href="#集群无法启动" class="headerlink" title="集群无法启动"></a>集群无法启动</h1><p>如果在执行gpstart -a时集群时，因为segment的数据目录问题导致无法启动整个集群</p>
+<p>那么就只启动master的维护模式</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gpstart -m</span><br></pre></td></tr></table></figure>
+<p>可以支持gpstate的命令查询，可以查询对应的primary和mirror目录（Mirror segment采用物理文件复制的方案—primary segment中数据文件I / O被复制到mirror segment上，因此mirror segment的文件与primary segment上的文件相同）<br>使用scp命令进行文件一致<br>备份segment节点上的文件夹，例如<br>将mirror的数据目录完整发送到primary的目录，要复制整个文件夹，不要创建目标文件夹后复制文件，不然会提示文件类型无法识别（postgresql的数据目录检测机制）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mv /data/primary/gpseg2 /data/primary/gpseg2-bak</span><br><span class="line">scp -r 另一台segment机器:/data/mirror/gpseg2 /data/primary/gpseg2</span><br></pre></td></tr></table></figure>
+
+<h1 id="为primary-master和standby-master配置一个虚拟IP地址"><a href="#为primary-master和standby-master配置一个虚拟IP地址" class="headerlink" title="为primary master和standby master配置一个虚拟IP地址"></a>为primary master和standby master配置一个虚拟IP地址</h1><p>可以利用keepalived产生一个VIP，利用keepalived的检测进行权重增减，实现VIP漂移</p>
+<h1 id="备份还原"><a href="#备份还原" class="headerlink" title="备份还原"></a><strong>备份还原</strong></h1><ol>
+<li>Greenplum早期通过使用PG数据库的备份工具实现备份。但随着数据量不断增大，基于PG备份工具的串行备份模式无法满足用户对备份时效的需求。</li>
+<li>Greenplum开始了第二代备份工具gp_dump的研发，并在2005年左右正式发布，gp_dump通过引入并行备份解决了串行备份时效低的问题，但使用上相对比较复杂。</li>
+<li>为了进一步的完善了用户使用体验，官方基于gp_dump，开发了gpcrodump备份工具。gpcrodump非常的成功，推出以来，为用户服务了10多年，当前还有大量的用户在用（GPDB 4.22以前的版本建议的备份工具）。<br>但gpcrodump有一个非常大的限制，就是备份时长时间锁表，因此需要用户预留相应的时间窗口。随着用户数据量的持续提升，以及HTAP混合负载应用的需求，企业对在线联机备份（备份时不需要中断业务）的需求愈发强烈。</li>
+<li>因此大概2015年，Pivotal开始研究新一代的备份工具，并在2017年正式发布，这就是新一代备份工具gpbackup。<br>gpbackup消除了锁表（专有锁）机制，同时，创新性的把GP的原有的外部表技术（一种高效的大规模并行数据加载和卸载技术）引入，用户无需为备份预留单独的时间窗口，同时扩展了备份存储的支持，<br>当前可用使用本地文件系统、Dell Data Domain、NBU、以及分布式存储，也可用使用公有云对象存储（S3），同时还支持用户自定义备份的存储接口。</li>
+</ol>
+<p>完整全量备份：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gpbackup --dbname wyf --backup-dir /data/backup --leaf-partition-data</span><br></pre></td></tr></table></figure>
+<p>创建增量备份,增量备份要确保之前的备份不呢丢失，不然无法还原：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gpbackup --dbname wyf --backup-dir /data/backup --leaf-partition-data --incremental</span><br></pre></td></tr></table></figure>
+<p>基于某个备份做增量备份，–from-timestamp 后面跟的是已经存在的备份时间戳（例如：/data/backup/gpseg-1/backups/备份日期/下查看）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gpbackup --dbname wyf --backup-dir /mybackup --leaf-partition-data --incremental --from-timestamp 20210909145418</span><br></pre></td></tr></table></figure>
+
+<p>恢复（不创建库）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gprestore --backup-dir /data/backup --timestamp 20210909152128</span><br></pre></td></tr></table></figure>
+<p>恢复（创建库）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gprestore --backup-dir /data/backup --create-db --timestamp 20210909152128</span><br></pre></td></tr></table></figure></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">huisebug</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://huisebug.github.io/2021/09/10/greenplum%E6%93%8D%E4%BD%9C%E6%8C%87%E4%BB%A4%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/">https://huisebug.github.io/2021/09/10/greenplum操作指令及解决方法/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://huisebug.github.io" target="_blank">huisebug</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/greenplum/">greenplum</a></div><div class="post_share"><div class="social-share" data-image="/img/greenplum.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button button--animated"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/img/wechat.jpg" target="_blank"><img class="post-qr-code-img" src="/img/wechat.jpg" alt="wechat"/></a><div class="post-qr-code-desc">wechat</div></li><li class="reward-item"><a href="/img/alipay.jpg" target="_blank"><img class="post-qr-code-img" src="/img/alipay.jpg" alt="alipay"/></a><div class="post-qr-code-desc">alipay</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2021/07/06/kata%E5%AE%B9%E5%99%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E5%88%86%E4%BA%AB/"><img class="next-cover" src="/img/kata.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">kata容器的一些分享</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/linuxqie.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">huisebug</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">17</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">47</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/huisebug"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/huisebug" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:huisebug@outlook.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">记录容器生活</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%93%8D%E4%BD%9C%E8%A7%84%E8%8C%83"><span class="toc-number">1.</span> <span class="toc-text">操作规范</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="toc-number">2.</span> <span class="toc-text">常用命令</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Master%E8%A7%92%E8%89%B2%E6%95%85%E9%9A%9C%E8%BD%AC%E7%A7%BB"><span class="toc-number">3.</span> <span class="toc-text">Master角色故障转移</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Segment%E8%A7%92%E8%89%B2%E6%95%85%E9%9A%9C%E4%BF%AE%E5%A4%8D"><span class="toc-number">4.</span> <span class="toc-text">Segment角色故障修复</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%9B%86%E7%BE%A4%E6%97%A0%E6%B3%95%E5%90%AF%E5%8A%A8"><span class="toc-number">5.</span> <span class="toc-text">集群无法启动</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%BAprimary-master%E5%92%8Cstandby-master%E9%85%8D%E7%BD%AE%E4%B8%80%E4%B8%AA%E8%99%9A%E6%8B%9FIP%E5%9C%B0%E5%9D%80"><span class="toc-number">6.</span> <span class="toc-text">为primary master和standby master配置一个虚拟IP地址</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F"><span class="toc-number">7.</span> <span class="toc-text">备份还原</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/09/10/greenplum%E6%93%8D%E4%BD%9C%E6%8C%87%E4%BB%A4%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/" title="greenplum操作指令及解决方法"><img src="/img/greenplum.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="greenplum操作指令及解决方法"/></a><div class="content"><a class="title" href="/2021/09/10/greenplum%E6%93%8D%E4%BD%9C%E6%8C%87%E4%BB%A4%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/" title="greenplum操作指令及解决方法">greenplum操作指令及解决方法</a><time datetime="2021-09-10T02:04:01.000Z" title="发表于 2021-09-10 10:04:01">2021-09-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/07/06/kata%E5%AE%B9%E5%99%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E5%88%86%E4%BA%AB/" title="kata容器的一些分享"><img src="/img/kata.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="kata容器的一些分享"/></a><div class="content"><a class="title" href="/2021/07/06/kata%E5%AE%B9%E5%99%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E5%88%86%E4%BA%AB/" title="kata容器的一些分享">kata容器的一些分享</a><time datetime="2021-07-06T06:04:01.000Z" title="发表于 2021-07-06 14:04:01">2021-07-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/04/19/containerd%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/" title="containerd基础概念"><img src="/img/containerd.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="containerd基础概念"/></a><div class="content"><a class="title" href="/2021/04/19/containerd%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/" title="containerd基础概念">containerd基础概念</a><time datetime="2021-04-19T06:04:01.000Z" title="发表于 2021-04-19 14:04:01">2021-04-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/12/15/k8s%E9%AB%98%E7%89%88%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2yaml/" title="k8s集群高版本1.18以上常见服务部署yaml"><img src="/img/head.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="k8s集群高版本1.18以上常见服务部署yaml"/></a><div class="content"><a class="title" href="/2020/12/15/k8s%E9%AB%98%E7%89%88%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2yaml/" title="k8s集群高版本1.18以上常见服务部署yaml">k8s集群高版本1.18以上常见服务部署yaml</a><time datetime="2020-12-15T09:09:01.000Z" title="发表于 2020-12-15 17:09:01">2020-12-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/12/15/prometheus-operator%E5%91%8A%E8%AD%A6%E5%9C%BA%E6%99%AF/" title="Prometheus-Operator告警场景"><img src="/img/head.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Prometheus-Operator告警场景"/></a><div class="content"><a class="title" href="/2020/12/15/prometheus-operator%E5%91%8A%E8%AD%A6%E5%9C%BA%E6%99%AF/" title="Prometheus-Operator告警场景">Prometheus-Operator告警场景</a><time datetime="2020-12-15T09:00:01.000Z" title="发表于 2020-12-15 17:00:01">2020-12-15</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/greenplum.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2021 By huisebug</div><div class="footer_custom_text">huisebug一直奋斗</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
