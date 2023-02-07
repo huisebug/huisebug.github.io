@@ -6,7 +6,7 @@
   <link href="https://huisebug.github.io/atom.xml" rel="self"/>
   
   <link href="https://huisebug.github.io/"/>
-  <updated>2022-12-09T03:04:02.000Z</updated>
+  <updated>2023-02-07T07:04:01.000Z</updated>
   <id>https://huisebug.github.io/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>k8simage-operator改良版kube-deploymentimage</title>
+    <link href="https://huisebug.github.io/2023/02/07/kube-deploymentimage/"/>
+    <id>https://huisebug.github.io/2023/02/07/kube-deploymentimage/</id>
+    <published>2023-02-07T03:04:01.000Z</published>
+    <updated>2023-02-07T07:04:01.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>为kubernetes集群中，由deployment方式进行部署的服务提供版本回滚功能</p><span id="more"></span><h1 id="需求场景"><a href="#需求场景" class="headerlink" title="需求场景"></a>需求场景</h1><ol><li><p> 当master节点上存放的yaml无法在使用kubect set image时进行同步更新</p></li><li><p> 官方提供的—record参数仅可能在kubectl set image时使用，回滚还需要额外的回滚操作命令，没有统一的UI界面</p></li></ol><h1 id="功能描述"><a href="#功能描述" class="headerlink" title="功能描述"></a>功能描述</h1><ol><li><p> 提供展示部署后所有命名空间下的Deployment的容器镜像信息</p></li><li><p> 提供回滚到对应版本的按钮update</p></li><li><p> 提供本地存储的yaml文件预览（鼠标滑动到对应的yaml路径即可）</p></li><li><p> 清理不需要的镜像版本信息delete（假删除，数据库中还有记录）</p></li><li><p> 处理之前k8simage-operator中Create,Update event多次触发Reconcile方法</p></li></ol><h1 id="UI效果预览"><a href="#UI效果预览" class="headerlink" title="UI效果预览"></a>UI效果预览</h1><p><img src="/2023/02/07/kube-deploymentimage/media/kube-deployment-ui.png"></p><h1 id="部署要求"><a href="#部署要求" class="headerlink" title="部署要求"></a>部署要求</h1><p>kube-deploymentimage默认会统计集群中所有的Deployment，yamlfile文件在部署kube-deploymentimage容器时，此处默认挂载了/etc/kubernetes目录到容器中的/etc/kubernetes，使用nodeselector默认调度到master1，即存放yaml的机器。</p><p>想展示yaml的本地文件内容，需要在deployment中添加  annotations信息，例如：   </p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    app: nginx</span><br><span class="line">    version: v1</span><br><span class="line">  annotations:    </span><br><span class="line">    yamlfile.huisebug.io/yamlfile: /etc/kubernetes/nginx/test-k8s-nginx.yaml</span><br><span class="line">  name: nginxredis</span><br><span class="line"></span><br></pre></td></tr></table></figure><p>yamlfile.huisebug.io/yamlfile是固定字段，后面是对应的yaml的文件路径（注意：挂载到kube-deploymentimage后路径是容器中的路径）</p><h1 id="项目地址"><a href="#项目地址" class="headerlink" title="项目地址"></a>项目地址</h1><p><a href="https://github.com/huisebug/kube-deploymentimage.git">https://github.com/huisebug/kube-deploymentimage.git</a></p>]]></content>
+    
+    
+    <summary type="html">&lt;p&gt;为kubernetes集群中，由deployment方式进行部署的服务提供版本回滚功能&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Kubernetes-Dev" scheme="https://huisebug.github.io/categories/Kubernetes-Dev/"/>
+    
+    
+    <category term="k8s" scheme="https://huisebug.github.io/tags/k8s/"/>
+    
+    <category term="kubebuilder" scheme="https://huisebug.github.io/tags/kubebuilder/"/>
+    
+    <category term="kubernetes" scheme="https://huisebug.github.io/tags/kubernetes/"/>
+    
+  </entry>
   
   <entry>
     <title>logfile-operator:服务日志系统收集多方案</title>
