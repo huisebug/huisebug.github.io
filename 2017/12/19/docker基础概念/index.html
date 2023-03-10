@@ -177,9 +177,13 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker load -i 文件名</span><br></pre></td></tr></table></figure>
 
 <p>将一个容器导出为文件</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker export 容器ID</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker export -o 文件名 容器ID</span><br></pre></td></tr></table></figure>
 <p>将容器中export导出的文件导入成为一个新的镜像，但是相比docker save命令，容器文件会丢失所有元数据和历史记录，仅保存容器当时的状态，相当于虚拟机快照</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker import 文件名</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker import 文件名 自定义镜像名</span><br></pre></td></tr></table></figure>
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#将一个容器导出为文件</span><br><span class="line">docker run --rm -it nginx bash   #得到容器ID为c07f89f23325</span><br><span class="line">#额外在开启一个终端</span><br><span class="line">docker export -o nginx.tar.gz c07f89f23325</span><br><span class="line">#文件导入成为一个新的镜像</span><br><span class="line">docker import nginx.tar.gz nginx:custom</span><br></pre></td></tr></table></figure>
+
+
 <h1 id="容器操作"><a href="#容器操作" class="headerlink" title="容器操作"></a>容器操作</h1><p>这个很少用了，一般是之前用于docker -it 镜像名 这种方式建立的时候，这个的缺点是exit会关闭容器，除非你建立容器的时候加了-d</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker attach 容器名</span><br></pre></td></tr></table></figure>
 <p>默认从docker hub拉取，拉取私库需要docker login dockerhub用户名（不是邮箱账户，就是用户名）</p>
