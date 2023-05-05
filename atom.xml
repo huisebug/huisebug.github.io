@@ -6,7 +6,7 @@
   <link href="https://huisebug.github.io/atom.xml" rel="self"/>
   
   <link href="https://huisebug.github.io/"/>
-  <updated>2023-03-21T08:04:01.000Z</updated>
+  <updated>2023-05-05T07:04:01.000Z</updated>
   <id>https://huisebug.github.io/</id>
   
   <author>
@@ -15,6 +15,35 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>wait-injection服务依赖等待注入</title>
+    <link href="https://huisebug.github.io/2023/05/05/wait-injection/"/>
+    <id>https://huisebug.github.io/2023/05/05/wait-injection/</id>
+    <published>2023-05-05T03:04:01.000Z</published>
+    <updated>2023-05-05T07:04:01.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>在kubernetes集群中,服务之间存在依赖关系,wait-injection利用initcontainer功能快速便捷的为服务添加相应的依赖关系</p><span id="more"></span><h1 id="项目地址"><a href="#项目地址" class="headerlink" title="项目地址"></a>项目地址</h1><p><a href="https://github.com/huisebug/wait-injection.git">https://github.com/huisebug/wait-injection.git</a></p><h1 id="部署配置"><a href="#部署配置" class="headerlink" title="部署配置"></a>部署配置</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f cert-manager.yaml</span><br><span class="line">kubectl apply -f wait-injection.yaml</span><br></pre></td></tr></table></figure><p>为需要进行注入的服务所在命名空间打上label</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl label namespace 业务namespace wait-pod-admission-webhook-injection=enabled</span><br></pre></td></tr></table></figure><p>利用kubernetes pod注入对运行的服务进行注入容器，注入多个init容器<br>需要在以下进行注解<br><font color="#FF0000" size="6" face="黑体">pod.spec.template.metadata.annotations</font></p><p>tcpsocket.waiting.huisebug.org/dep数字: ip:端口号或者域名:端口号<br>tcpsocket使用telnet对依赖服务和端口进行telnet</p><p>httpget.waiting.huisebug.org/dep数字: api-url|成功标识<br>httpget对依赖服务给的api url进行curl,使用|作为分隔符,|后面是api请求成功标志</p><p><font color="#FF0000" size="4" face="黑体">相同类型使用多个数字进行区分</font><br><font color="#FF0000" size="4" face="黑体">依赖必须全部满足才会进行业务container创建</font></p><p>例如:</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    app: nginx</span><br><span class="line">    version: v1</span><br><span class="line">  name: sidecar-test</span><br><span class="line">  namespace: sidecar-test</span><br><span class="line">spec:</span><br><span class="line">  replicas: 1</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      app: nginx</span><br><span class="line">      version: v1</span><br><span class="line">  strategy:</span><br><span class="line">    rollingUpdate:</span><br><span class="line">      maxSurge: 1</span><br><span class="line">      maxUnavailable: 0</span><br><span class="line">    type: RollingUpdate</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      annotations:</span><br><span class="line">        tcpsocket.waiting.huisebug.org/dep1: www.google.com:443</span><br><span class="line">        tcpsocket.waiting.huisebug.org/dep2: www.google.com:8080</span><br><span class="line">        httpget.waiting.huisebug.org/dep1: https://www.google.com|google</span><br><span class="line">        httpget.waiting.huisebug.org/dep2: https://www.google.com|Google</span><br><span class="line">      labels:</span><br><span class="line">        app: nginx</span><br><span class="line">        version: v1</span><br></pre></td></tr></table></figure>]]></content>
+    
+    
+    <summary type="html">&lt;p&gt;在kubernetes集群中,服务之间存在依赖关系,wait-injection利用initcontainer功能快速便捷的为服务添加相应的依赖关系&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Kubernetes-Dev" scheme="https://huisebug.github.io/categories/Kubernetes-Dev/"/>
+    
+    
+    <category term="k8s" scheme="https://huisebug.github.io/tags/k8s/"/>
+    
+    <category term="kubebuilder" scheme="https://huisebug.github.io/tags/kubebuilder/"/>
+    
+    <category term="kubernetes" scheme="https://huisebug.github.io/tags/kubernetes/"/>
+    
+    <category term="inincontainer" scheme="https://huisebug.github.io/tags/inincontainer/"/>
+    
+    <category term="pod-injection" scheme="https://huisebug.github.io/tags/pod-injection/"/>
+    
+  </entry>
   
   <entry>
     <title>kubernetesalias:kubernetes封装命令工具</title>
@@ -65,33 +94,6 @@
     <category term="kubebuilder" scheme="https://huisebug.github.io/tags/kubebuilder/"/>
     
     <category term="kubernetes" scheme="https://huisebug.github.io/tags/kubernetes/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>wait-injection服务依赖等待注入</title>
-    <link href="https://huisebug.github.io/2023/02/07/wait-injection/"/>
-    <id>https://huisebug.github.io/2023/02/07/wait-injection/</id>
-    <published>2023-02-07T03:04:01.000Z</published>
-    <updated>2023-02-07T07:04:01.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>在kubernetes集群中,服务之间存在依赖关系,wait-injection利用initcontainer功能快速便捷的为服务添加相应的依赖关系</p><span id="more"></span><h1 id="项目地址"><a href="#项目地址" class="headerlink" title="项目地址"></a>项目地址</h1><p><a href="https://github.com/huisebug/wait-injection.git">https://github.com/huisebug/wait-injection.git</a></p><h1 id="部署配置"><a href="#部署配置" class="headerlink" title="部署配置"></a>部署配置</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f cert-manager.yaml</span><br><span class="line">kubectl apply -f wait-injection.yaml</span><br></pre></td></tr></table></figure><p>为需要进行注入的服务所在命名空间打上label</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl label namespace 业务namespace wait-pod-admission-webhook-injection=enabled</span><br></pre></td></tr></table></figure><p>利用kubernetes pod注入对运行的服务进行注入容器，注入多个init容器<br>需要在以下进行注解<br><font color="#FF0000" size="6" face="黑体">pod.spec.template.metadata.annotations</font></p><p>tcpsocket.waiting.huisebug.org/dep数字: ip:端口号或者域名:端口号<br>tcpsocket使用telnet对依赖服务和端口进行telnet</p><p>httpget.waiting.huisebug.org/dep数字: api-url|成功标识<br>httpget对依赖服务给的api url进行curl,使用|作为分隔符,|后面是api请求成功标志</p><p><font color="#FF0000" size="4" face="黑体">相同类型使用多个数字进行区分</font><br><font color="#FF0000" size="4" face="黑体">依赖必须全部满足才会进行业务container创建</font></p><p>例如:</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    app: nginx</span><br><span class="line">    version: v1</span><br><span class="line">  name: sidecar-test</span><br><span class="line">  namespace: sidecar-test</span><br><span class="line">spec:</span><br><span class="line">  replicas: 1</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      app: nginx</span><br><span class="line">      version: v1</span><br><span class="line">  strategy:</span><br><span class="line">    rollingUpdate:</span><br><span class="line">      maxSurge: 1</span><br><span class="line">      maxUnavailable: 0</span><br><span class="line">    type: RollingUpdate</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      annotations:</span><br><span class="line">        tcpsocket.waiting.huisebug.org/dep1: www.google.com:443</span><br><span class="line">        tcpsocket.waiting.huisebug.org/dep2: www.google.com:8080</span><br><span class="line">        httpget.waiting.huisebug.org/dep1: https://www.google.com|google</span><br><span class="line">        httpget.waiting.huisebug.org/dep2: https://www.google.com|Google</span><br><span class="line">      labels:</span><br><span class="line">        app: nginx</span><br><span class="line">        version: v1</span><br></pre></td></tr></table></figure>]]></content>
-    
-    
-    <summary type="html">&lt;p&gt;在kubernetes集群中,服务之间存在依赖关系,wait-injection利用initcontainer功能快速便捷的为服务添加相应的依赖关系&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="Kubernetes-Dev" scheme="https://huisebug.github.io/categories/Kubernetes-Dev/"/>
-    
-    
-    <category term="k8s" scheme="https://huisebug.github.io/tags/k8s/"/>
-    
-    <category term="kubebuilder" scheme="https://huisebug.github.io/tags/kubebuilder/"/>
-    
-    <category term="kubernetes" scheme="https://huisebug.github.io/tags/kubernetes/"/>
-    
-    <category term="inincontainer" scheme="https://huisebug.github.io/tags/inincontainer/"/>
     
   </entry>
   

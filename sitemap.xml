@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://huisebug.github.io/2023/05/05/wait-injection/</loc>
+    
+    <lastmod>2023-05-05</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://huisebug.github.io/2019/05/23/knative/</loc>
     
     <lastmod>2023-04-20</lastmod>
@@ -52,13 +59,6 @@
   
   <url>
     <loc>https://huisebug.github.io/2023/02/07/kube-deploymentimage/</loc>
-    
-    <lastmod>2023-02-07</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://huisebug.github.io/2023/02/07/wait-injection/</loc>
     
     <lastmod>2023-02-07</lastmod>
     
@@ -586,6 +586,13 @@
   
   <url>
     <loc>https://huisebug.github.io/tags/inincontainer/</loc>
+    <lastmod>2023-05-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://huisebug.github.io/tags/pod-injection/</loc>
     <lastmod>2023-05-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
