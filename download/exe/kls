@@ -1,0 +1,7 @@
+#!/bin/bash
+namespace=$1
+if [ "$namespace"x = ""x ]; then
+kubectl get pod --all-namespaces -o wide
+else
+kubectl get pod -n $namespace -o wide
+fi

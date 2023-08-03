@@ -1,0 +1,13 @@
+#!/bin/bash
+ser=$1
+conid=$2
+read ns pod <<< $(kubectl get pod --all-namespaces | awk '{print $1,$2}'| grep $ser)
+echo $ns 
+echo $pod
+if [ ! $conid ]; then
+kubectl exec -it $pod -n $ns sh
+else
+conname=$(kubectl get pod -n $ns $pod  -o custom-columns=CONTAINER:.spec.containers[$conid].name | sed  '1d')
+echo $conname
+kubectl exec -it $pod -n $ns -c $conname sh
+fi

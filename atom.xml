@@ -6,7 +6,7 @@
   <link href="https://huisebug.github.io/atom.xml" rel="self"/>
   
   <link href="https://huisebug.github.io/"/>
-  <updated>2023-06-28T06:29:32.109Z</updated>
+  <updated>2023-08-03T08:04:01.000Z</updated>
   <id>https://huisebug.github.io/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>kubernetesalias:kubernetes封装命令工具</title>
+    <link href="https://huisebug.github.io/2023/08/03/kubernetesalias/"/>
+    <id>https://huisebug.github.io/2023/08/03/kubernetesalias/</id>
+    <published>2023-08-03T08:04:01.000Z</published>
+    <updated>2023-08-03T08:04:01.000Z</updated>
+    
+    <content type="html"><![CDATA[<p><font color="#483D8B" size="6" face="黑体">愉快的执行kubernetes集群封装命令</font></p><span id="more"></span><h1 id="使用要求"><a href="#使用要求" class="headerlink" title="使用要求"></a>使用要求</h1><p><font size="3" face="黑体">工具需要在master节点进行运行,确保存在集群管理员kubeconfig(/etc/kubernetes/admin.conf)文件</font></p><h1 id="功能描述"><a href="#功能描述" class="headerlink" title="功能描述"></a>功能描述</h1><p><font size="6" face="黑体">点击工具名称即可进行下载</font></p><p><a href="/download/exe/kls">kls</a><br>列出整个集群的所有pod信息,包含pod ip,所在节点; 仅列出某个namespace,例如: kls kube-system(可选)</p><p><a href="/download/exe/klss">klss</a><br>列出整个集群的所有service信息; 仅列出某个namespace,例如: klss kube-system(可选)</p><p><a href="/download/exe/kdel">kdel</a><br>传递条件,筛选出符合条件的所有pod信息,传递编号进行删除对应编号的pod;支持删除单个pod,同时删除多个pod<br><img src="/2023/08/03/kubernetesalias/media/kdel.png"></p><p><a href="/download/exe/klog">klog</a><br>传递条件,筛选出符合条件的所有pod及容器信息,传递编号进行查看对应编号的容器日志; 例如: klog pod名 查看倒数行数(可选)<br><img src="/2023/08/03/kubernetesalias/media/klog.png"></p><p><a href="/download/exe/kdebug">kdebug</a><br>为了安全和缩小容器镜像，大部分容器是不会安装常用的linux命令的，需要查看服务端口运行情况和查看ip地址信息和进程，可通过kubernetes Ephemeral Containers功能进行查看<br>此容器只是共享了pod，并不是源pod，所以仅能查看系统信息，例如：</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">查看进程</span></span><br><span class="line">ps aux</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash">查看端口运行</span></span><br><span class="line">netstat -lntp</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash">查看ip</span></span><br><span class="line">ifconfig  或者 ip addr</span><br></pre></td></tr></table></figure><p><img src="/2023/08/03/kubernetesalias/media/kdebug.png"></p><p><a href="/download/exe/kebash">kebash</a><br>传递条件,筛选出符合条件的第一个pod使用bash进行终端连接; kebash pod名 传递容器编号(可选)<br><img src="/2023/08/03/kubernetesalias/media/kebash.png"></p><p><a href="/download/exe/kesh">kesh</a><br>传递条件,筛选出符合条件的第一个pod使用bash进行终端连接; kesh pod名 传递容器编号(可选)<br><img src="/2023/08/03/kubernetesalias/media/kesh.png"></p><p><font size="4" face="黑体">当容器镜像使用centos、debian、ubuntu时使用bash进行终端登录，使用的是alpine时使用sh进行终端登录，当然都是支持sh登录，只是sh功能没有bash全面,有些容器镜像可能连sh都不允许</font></p><p><a href="/download/exe/kup">kup</a><br>当更新配置文件,需要pod进行生效,可是如果删除pod将会导致服务不可用,部署集中有配置了更新策略,此工具就是触发部署集的更新策略,比如是滚动更新,那么部署集将会进行滚动更新<br>传递条件,筛选出符合条件的pod并且列出所使用的部署集方式; 传递pod对应编号,属于同一个部署集的pod都会触发更新<br><img src="/2023/08/03/kubernetesalias/media/kup.png"></p>]]></content>
+    
+    
+    <summary type="html">&lt;p&gt;&lt;font color=&quot;#483D8B&quot; size=&quot;6&quot; face=&quot;黑体&quot;&gt;愉快的执行kubernetes集群封装命令&lt;/font&gt;&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Kubernetes-Dev" scheme="https://huisebug.github.io/categories/Kubernetes-Dev/"/>
+    
+    
+    <category term="k8s" scheme="https://huisebug.github.io/tags/k8s/"/>
+    
+    <category term="kubernetes" scheme="https://huisebug.github.io/tags/kubernetes/"/>
+    
+    <category term="client-go" scheme="https://huisebug.github.io/tags/client-go/"/>
+    
+    <category term="kubectl" scheme="https://huisebug.github.io/tags/kubectl/"/>
+    
+  </entry>
   
   <entry>
     <title>kube-prometheus+thanos 多集群prometheus方案存储方案</title>
@@ -61,33 +88,6 @@
     <category term="inincontainer" scheme="https://huisebug.github.io/tags/inincontainer/"/>
     
     <category term="pod-injection" scheme="https://huisebug.github.io/tags/pod-injection/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>kubernetesalias:kubernetes封装命令工具</title>
-    <link href="https://huisebug.github.io/2023/03/21/kubernetesalias/"/>
-    <id>https://huisebug.github.io/2023/03/21/kubernetesalias/</id>
-    <published>2023-03-21T03:04:01.000Z</published>
-    <updated>2023-03-21T08:04:01.000Z</updated>
-    
-    <content type="html"><![CDATA[<p><font color="#483D8B" size="5" face="黑体">愉快的执行kubectl logs -f 和kubectl delete pod</font></p><span id="more"></span><h1 id="需求场景"><a href="#需求场景" class="headerlink" title="需求场景"></a>需求场景</h1><ol><li><p> kubernetes中重启服务是删除pod,当需要删除多个pod时,需要进行查找pod信息</p></li><li><p> kubernetes中查看服务日志需要输入详细的pod信息,多个容器时还需要进行-c传递,kubernetesalias帮你列出匹配的pod及其容器,便捷动态查看日志</p></li></ol><h1 id="使用要求"><a href="#使用要求" class="headerlink" title="使用要求"></a>使用要求</h1><p><font color="#DC143C" size="3" face="黑体">工具需要在master节点进行运行,确保存在集群管理员kubeconfig(/etc/kubernetes/admin.conf)文件</font></p><h1 id="功能描述"><a href="#功能描述" class="headerlink" title="功能描述"></a>功能描述</h1><ol><li><p> kdel支持删除单个pod,多选多个pod进行删除,筛选出的条件的所有pod</p></li><li><p> klog是动态列出pod日志</p></li><li><p> 仅支持传递一个条件</p></li></ol><h1 id="使用效果预览"><a href="#使用效果预览" class="headerlink" title="使用效果预览"></a>使用效果预览</h1><p><font color="#483D8B" size="5" face="黑体">kdel</font><br><img src="/2023/03/21/kubernetesalias/media/kdel.png"></p><p><font color="#483D8B" size="5" face="黑体">klog pod中只有1个容器</font><br><img src="/2023/03/21/kubernetesalias/media/klog1.png"></p><p><font color="#483D8B" size="5" face="黑体">klog pod中有2个容器</font><br><img src="/2023/03/21/kubernetesalias/media/klog2.png"></p><h1 id="工具下载"><a href="#工具下载" class="headerlink" title="工具下载"></a>工具下载</h1><p><a href="/download/exe/kdel">kdel</a><br><a href="/download/exe/klog">klog</a></p><h1 id="项目地址"><a href="#项目地址" class="headerlink" title="项目地址"></a>项目地址</h1><p><a href="https://github.com/huisebug/kubernetesalias.git">https://github.com/huisebug/kubernetesalias.git</a></p>]]></content>
-    
-    
-    <summary type="html">&lt;p&gt;&lt;font color=&quot;#483D8B&quot; size=&quot;5&quot; face=&quot;黑体&quot;&gt;愉快的执行kubectl logs -f 和kubectl delete pod&lt;/font&gt;&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="Kubernetes-Dev" scheme="https://huisebug.github.io/categories/Kubernetes-Dev/"/>
-    
-    
-    <category term="k8s" scheme="https://huisebug.github.io/tags/k8s/"/>
-    
-    <category term="kubernetes" scheme="https://huisebug.github.io/tags/kubernetes/"/>
-    
-    <category term="client-go" scheme="https://huisebug.github.io/tags/client-go/"/>
-    
-    <category term="kubectl" scheme="https://huisebug.github.io/tags/kubectl/"/>
     
   </entry>
   
