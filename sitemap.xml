@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://huisebug.github.io/2024/02/04/terraform-kubernetes/</loc>
+    
+    <lastmod>2024-02-04</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://huisebug.github.io/2024/02/04/terraform-k8s-golangstruct/</loc>
     
     <lastmod>2024-02-04</lastmod>
@@ -679,6 +686,13 @@
   
   <url>
     <loc>https://huisebug.github.io/categories/Kubernetes-Dev/</loc>
+    <lastmod>2024-02-04</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://huisebug.github.io/categories/Terraform/</loc>
     <lastmod>2024-02-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
