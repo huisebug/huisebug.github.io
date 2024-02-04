@@ -182,7 +182,7 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash tf.sh    #输入3</span><br></pre></td></tr></table></figure>
 <p><img src="/2024/02/04/terraform-kubernetes/media/tfsh4.png"><br>完成后会执行down.sh下载相关的kubernetes二进制包<br><img src="/2024/02/04/terraform-kubernetes/media/tfsh5.png"></p>
 <p>6)直接执行安装剩余的过程：install  </p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash down.sh     #输入install  </span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash tf.sh      #输入install  </span><br></pre></td></tr></table></figure>
 <p><img src="/2024/02/04/terraform-kubernetes/media/tfshinstall.png"></p>
 <p>7)查看节点状态和pod信息</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl get node  </span><br><span class="line">kubectl get pod -A </span><br></pre></td></tr></table></figure>
