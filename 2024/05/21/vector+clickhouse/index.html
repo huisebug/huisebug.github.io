@@ -1,0 +1,173 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>vector+clickhouse:新型kubernetes集群日志收集方案 | huisebug</title><meta name="keywords" content="k8s,kubernetes,vector,vector-aggregator,clickhouse,clickhouse-cluster"><meta name="author" content="huisebug"><meta name="copyright" content="huisebug"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Kubernetes集群中将 Vector 和 ClickHouse 结合使用可以构建一个强大的日志收集和分析系统。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="vector+clickhouse:新型kubernetes集群日志收集方案">
+<meta property="og:url" content="https://huisebug.github.io/2024/05/21/vector+clickhouse/index.html">
+<meta property="og:site_name" content="huisebug">
+<meta property="og:description" content="Kubernetes集群中将 Vector 和 ClickHouse 结合使用可以构建一个强大的日志收集和分析系统。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://huisebug.github.io/img/vector+clickhouse.jpg">
+<meta property="article:published_time" content="2024-05-21T09:04:01.000Z">
+<meta property="article:modified_time" content="2024-05-21T09:04:01.000Z">
+<meta property="article:author" content="huisebug">
+<meta property="article:tag" content="k8s">
+<meta property="article:tag" content="kubernetes">
+<meta property="article:tag" content="vector">
+<meta property="article:tag" content="vector-aggregator">
+<meta property="article:tag" content="clickhouse">
+<meta property="article:tag" content="clickhouse-cluster">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://huisebug.github.io/img/vector+clickhouse.jpg"><link rel="shortcut icon" href="/img/linuxqie.jpg"><link rel="canonical" href="https://huisebug.github.io/2024/05/21/vector+clickhouse/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: huisebug","link":"链接: ","source":"来源: huisebug","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'vector+clickhouse:新型kubernetes集群日志收集方案',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-05-21 17:04:01'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="huisebug" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/linuxqie.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">26</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">65</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/download/"><i class="fa-fw fas fa-folder-open"></i><span> Download</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/vector+clickhouse.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">huisebug</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/download/"><i class="fa-fw fas fa-folder-open"></i><span> Download</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">vector+clickhouse:新型kubernetes集群日志收集方案</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-05-21T09:04:01.000Z" title="发表于 2024-05-21 17:04:01">2024-05-21</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-05-21T09:04:01.000Z" title="更新于 2024-05-21 17:04:01">2024-05-21</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Kubernetes/">Kubernetes</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="vector+clickhouse:新型kubernetes集群日志收集方案"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>Kubernetes集群中将 Vector 和 ClickHouse 结合使用可以构建一个强大的日志收集和分析系统。</p>
+<span id="more"></span>
+
+<p>方案下载地址： <a href="/download/zip/vector+clickhouse.zip">vector+clickhouse</a></p>
+<p>以下是使用 Vector 和 ClickHouse 进行集群日志收集的方案说明：</p>
+<h1 id="日志采集"><a href="#日志采集" class="headerlink" title="日志采集"></a>日志采集</h1><p>使用 Vector 作为日志采集器，它可以部署在每个节点上，负责收集和处理日志数据。<br>Vector 支持从多种来源采集日志，包括文件、标准输出、网络等。</p>
+<h1 id="日志传输"><a href="#日志传输" class="headerlink" title="日志传输"></a>日志传输</h1><p>Vector 可以将采集到的日志数据进行处理和转换，然后传输到 ClickHouse。<br>传输过程中，Vector 支持各种数据格式和协议，确保日志数据可以高效、准确地发送到 ClickHouse。</p>
+<h1 id="日志存储"><a href="#日志存储" class="headerlink" title="日志存储"></a>日志存储</h1><p>ClickHouse 作为日志数据的存储系统，提供高性能的读写能力。<br>ClickHouse 的表结构需要根据日志数据的特点进行设计，以优化查询性能。</p>
+<h1 id="日志处理"><a href="#日志处理" class="headerlink" title="日志处理"></a>日志处理</h1><p>在 Vector 中，可以使用 Vector Remap Language (VRL) 对日志数据进行清洗和转换。<br>可以定义复杂的处理逻辑，将非结构化的日志数据转换为结构化的格式，以便于存储和查询。</p>
+<h1 id="日志查询"><a href="#日志查询" class="headerlink" title="日志查询"></a>日志查询</h1><p>ClickHouse 提供了强大的 SQL 查询能力，可以对存储的日志数据执行快速查询。<br>可以利用 ClickHouse 的分布式查询功能，跨多个节点并行执行查询，提高查询效率。</p>
+<h1 id="日志可视化"><a href="#日志可视化" class="headerlink" title="日志可视化"></a>日志可视化</h1><p>虽然 ClickHouse 本身不提供可视化界面，但可以将查询结果导出到 Grafana 或其他可视化工具中，以图形化的方式展示日志数据。</p>
+<h1 id="日志生命周期管理"><a href="#日志生命周期管理" class="headerlink" title="日志生命周期管理"></a>日志生命周期管理</h1><p>ClickHouse 支持设置表的 TTL（Time To Live），自动清理过期的日志数据。<br>可以配置定时任务，对超时的日志执行删除操作，管理日志数据的生命周期。</p>
+<h1 id="系统监控与告警"><a href="#系统监控与告警" class="headerlink" title="系统监控与告警"></a>系统监控与告警</h1><p>结合监控系统，可以对日志收集和查询的性能进行监控，并设置告警。<br>监控系统可以帮助及时发现和解决潜在的问题，保证日志系统的稳定运行。</p>
+<h1 id="安全性"><a href="#安全性" class="headerlink" title="安全性"></a>安全性</h1><p>需要确保日志数据的安全，包括数据的加密传输和存储，以及访问控制。</p>
+<h1 id="高可用性"><a href="#高可用性" class="headerlink" title="高可用性"></a>高可用性</h1><p>为了提高系统的可用性，可以在多个节点上部署 Vector 实例，并在 ClickHouse 中设置数据副本。</p>
+<h1 id="扩展性"><a href="#扩展性" class="headerlink" title="扩展性"></a>扩展性</h1><p>随着日志数据量的增长，可以水平扩展 Vector 和 ClickHouse 集群，以应对更大的数据处理需求。<br>使用 Vector 和 ClickHouse 的日志收集方案可以提供高效、可扩展且成本效益高的日志管理能力。通过合理的配置和优化，可以满足大规模日志数据的收集、存储和分析需求。</p>
+<p>ClickHouse 集群方案参考 <a href="/download/">download</a> 下的clickhous-cluster</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">huisebug</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://huisebug.github.io/2024/05/21/vector+clickhouse/">https://huisebug.github.io/2024/05/21/vector+clickhouse/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://huisebug.github.io" target="_blank">huisebug</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/k8s/">k8s</a><a class="post-meta__tags" href="/tags/kubernetes/">kubernetes</a><a class="post-meta__tags" href="/tags/vector/">vector</a><a class="post-meta__tags" href="/tags/vector-aggregator/">vector-aggregator</a><a class="post-meta__tags" href="/tags/clickhouse/">clickhouse</a><a class="post-meta__tags" href="/tags/clickhouse-cluster/">clickhouse-cluster</a></div><div class="post_share"><div class="social-share" data-image="/img/vector+clickhouse.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button button--animated"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/img/wechat.jpg" target="_blank"><img class="post-qr-code-img" src="/img/wechat.jpg" alt="wechat"/></a><div class="post-qr-code-desc">wechat</div></li><li class="reward-item"><a href="/img/alipay.jpg" target="_blank"><img class="post-qr-code-img" src="/img/alipay.jpg" alt="alipay"/></a><div class="post-qr-code-desc">alipay</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2024/02/04/terraform-kubernetes/"><img class="next-cover" src="/img/terraform-kubernetes.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">terraform部署kubernetes1.26.12集群</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/06/16/k8simage-operator/" title="k8s版本回滚工具k8simage-operator"><img class="cover" src="/img/k8simage-operator.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-06-16</div><div class="title">k8s版本回滚工具k8simage-operator</div></div></a></div><div><a href="/2022/12/09/logfile-operator/" title="logfile-operator:服务日志系统收集多方案"><img class="cover" src="/img/logfile-operator.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-12-09</div><div class="title">logfile-operator:服务日志系统收集多方案</div></div></a></div><div><a href="/2023/02/07/kube-deploymentimage/" title="kube-deploymentimage:k8simage-operator改良版本"><img class="cover" src="/img/kube-deploymentimage.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-02-07</div><div class="title">kube-deploymentimage:k8simage-operator改良版本</div></div></a></div><div><a href="/2023/08/03/kubernetesalias/" title="kubernetesalias:kubernetes封装命令工具"><img class="cover" src="/img/kubernetesalias.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-08-03</div><div class="title">kubernetesalias:kubernetes封装命令工具</div></div></a></div><div><a href="/2023/05/05/wait-injection/" title="wait-injection服务依赖等待注入"><img class="cover" src="/img/wait-injection.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-05-05</div><div class="title">wait-injection服务依赖等待注入</div></div></a></div><div><a href="/2024/02/04/terraform-k8s-golangstruct/" title="golang terraform kubernetes结构体"><img class="cover" src="/img/terraform-kubernetes.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-04</div><div class="title">golang terraform kubernetes结构体</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/linuxqie.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">huisebug</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">26</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">65</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/huisebug"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/huisebug" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:huisebug@aliyun.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">贯彻容器搬砖化 提供有偿技术支援 请联系QQ-1139873783</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%97%A5%E5%BF%97%E9%87%87%E9%9B%86"><span class="toc-number">1.</span> <span class="toc-text">日志采集</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%97%A5%E5%BF%97%E4%BC%A0%E8%BE%93"><span class="toc-number">2.</span> <span class="toc-text">日志传输</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%97%A5%E5%BF%97%E5%AD%98%E5%82%A8"><span class="toc-number">3.</span> <span class="toc-text">日志存储</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%97%A5%E5%BF%97%E5%A4%84%E7%90%86"><span class="toc-number">4.</span> <span class="toc-text">日志处理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%97%A5%E5%BF%97%E6%9F%A5%E8%AF%A2"><span class="toc-number">5.</span> <span class="toc-text">日志查询</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%97%A5%E5%BF%97%E5%8F%AF%E8%A7%86%E5%8C%96"><span class="toc-number">6.</span> <span class="toc-text">日志可视化</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%97%A5%E5%BF%97%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E7%AE%A1%E7%90%86"><span class="toc-number">7.</span> <span class="toc-text">日志生命周期管理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E7%9B%91%E6%8E%A7%E4%B8%8E%E5%91%8A%E8%AD%A6"><span class="toc-number">8.</span> <span class="toc-text">系统监控与告警</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%89%E5%85%A8%E6%80%A7"><span class="toc-number">9.</span> <span class="toc-text">安全性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%AB%98%E5%8F%AF%E7%94%A8%E6%80%A7"><span class="toc-number">10.</span> <span class="toc-text">高可用性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%89%A9%E5%B1%95%E6%80%A7"><span class="toc-number">11.</span> <span class="toc-text">扩展性</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2024/05/21/vector+clickhouse/" title="vector+clickhouse:新型kubernetes集群日志收集方案"><img src="/img/vector+clickhouse.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="vector+clickhouse:新型kubernetes集群日志收集方案"/></a><div class="content"><a class="title" href="/2024/05/21/vector+clickhouse/" title="vector+clickhouse:新型kubernetes集群日志收集方案">vector+clickhouse:新型kubernetes集群日志收集方案</a><time datetime="2024-05-21T09:04:01.000Z" title="发表于 2024-05-21 17:04:01">2024-05-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/02/04/terraform-kubernetes/" title="terraform部署kubernetes1.26.12集群"><img src="/img/terraform-kubernetes.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="terraform部署kubernetes1.26.12集群"/></a><div class="content"><a class="title" href="/2024/02/04/terraform-kubernetes/" title="terraform部署kubernetes1.26.12集群">terraform部署kubernetes1.26.12集群</a><time datetime="2024-02-04T08:04:01.000Z" title="发表于 2024-02-04 16:04:01">2024-02-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/02/04/terraform-k8s-golangstruct/" title="golang terraform kubernetes结构体"><img src="/img/terraform-kubernetes.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="golang terraform kubernetes结构体"/></a><div class="content"><a class="title" href="/2024/02/04/terraform-k8s-golangstruct/" title="golang terraform kubernetes结构体">golang terraform kubernetes结构体</a><time datetime="2024-02-04T03:04:01.000Z" title="发表于 2024-02-04 11:04:01">2024-02-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/08/03/kubernetesalias/" title="kubernetesalias:kubernetes封装命令工具"><img src="/img/kubernetesalias.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="kubernetesalias:kubernetes封装命令工具"/></a><div class="content"><a class="title" href="/2023/08/03/kubernetesalias/" title="kubernetesalias:kubernetes封装命令工具">kubernetesalias:kubernetes封装命令工具</a><time datetime="2023-08-03T08:04:01.000Z" title="发表于 2023-08-03 16:04:01">2023-08-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/06/28/kube-prometheus-thanos/" title="kube-prometheus+thanos 多集群prometheus方案存储方案"><img src="/img/kube-prometheus-thanos.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="kube-prometheus+thanos 多集群prometheus方案存储方案"/></a><div class="content"><a class="title" href="/2023/06/28/kube-prometheus-thanos/" title="kube-prometheus+thanos 多集群prometheus方案存储方案">kube-prometheus+thanos 多集群prometheus方案存储方案</a><time datetime="2023-06-28T03:04:01.000Z" title="发表于 2023-06-28 11:04:01">2023-06-28</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/vector+clickhouse.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2024 By huisebug</div><div class="footer_custom_text">Good Luck</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
