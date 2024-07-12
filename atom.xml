@@ -30,7 +30,7 @@
     
     
     
-    <category term="小知识" scheme="https://huisebug.github.io/categories/%E5%B0%8F%E7%9F%A5%E8%AF%86/"/>
+    <category term="Kubernetes" scheme="https://huisebug.github.io/categories/Kubernetes/"/>
     
     
     <category term="k8s" scheme="https://huisebug.github.io/tags/k8s/"/>
@@ -69,45 +69,6 @@
     <category term="kubectl" scheme="https://huisebug.github.io/tags/kubectl/"/>
     
     <category term="yaml" scheme="https://huisebug.github.io/tags/yaml/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>logfile-operator:服务日志系统收集多方案</title>
-    <link href="https://huisebug.github.io/2024/06/28/logfile-operator/"/>
-    <id>https://huisebug.github.io/2024/06/28/logfile-operator/</id>
-    <published>2024-06-28T03:04:01.000Z</published>
-    <updated>2022-12-09T03:04:02.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>为kubernetes集群中部署服务提供多日志收集服务，快速接入多种部署方案的日志系统</p><span id="more"></span><h1 id="需求场景"><a href="#需求场景" class="headerlink" title="需求场景"></a>需求场景</h1><ul><li><p>   当pod中有多个容器时，需要对pod中的容器进行日志收集</p></li><li><p>   研发人员需要快速对服务进行日志收集后在kibana中集中查看</p></li></ul><h1 id="功能描述"><a href="#功能描述" class="headerlink" title="功能描述"></a>功能描述</h1><ul><li>  利用kubernetes pod注入对运行的服务进行注入容器，注入的容器和原容器在pod annotations配置的日志文件所在目录进行卷挂载，注解中配置的日志文件进行卷挂载，例如：<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      annotations:</span><br><span class="line">        logfile.huisebug.org/log1: /var/log/nginx/*.log</span><br></pre></td></tr></table></figure></li><li>  提供六种日志收集部署方案</li></ul><ol><li><p> filebeat+elasticsearch+kibana</p></li><li><p> filebeat+elasticsearch-cluster+kibana</p></li><li><p> filebeat+logstash+elasticsearch+kibana</p></li><li><p> filebeat+logstash+elasticsearch-cluster+kibana</p></li><li><p> filebeat+kafka+logstash+elasticsearch+kibana</p></li><li><p> filebeat+kafka-cluster+logstash+elasticsearch-cluster+kibana</p></li></ol><p>版本信息：<br>filebeat：8.5.0<br>logstash：8.5.0<br>kafka：3.3<br>zookeeper：3.8<br>elasticsearch：8.5.0<br>kibana：8.5.0</p><p>注意：elasticsearch集群这里采用的https集群</p><ul><li>  git项目首页提供的num的6个yaml文件对应了六种方案</li></ul><h1 id="部署命令（按顺序执行）"><a href="#部署命令（按顺序执行）" class="headerlink" title="部署命令（按顺序执行）"></a>部署命令（按顺序执行）</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f cert-manager.yaml</span><br><span class="line">kubectl apply -f deploy.yaml</span><br><span class="line">kubectl apply -f num数字.yaml</span><br></pre></td></tr></table></figure><h1 id="项目地址"><a href="#项目地址" class="headerlink" title="项目地址"></a>项目地址</h1><p><a href="https://github.com/huisebug/logfile-operator.git">https://github.com/huisebug/logfile-operator.git</a></p>]]></content>
-    
-    
-    <summary type="html">&lt;p&gt;为kubernetes集群中部署服务提供多日志收集服务，快速接入多种部署方案的日志系统&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="Kubernetes-Dev" scheme="https://huisebug.github.io/categories/Kubernetes-Dev/"/>
-    
-    
-    <category term="k8s" scheme="https://huisebug.github.io/tags/k8s/"/>
-    
-    <category term="elasticsearch" scheme="https://huisebug.github.io/tags/elasticsearch/"/>
-    
-    <category term="kubebuilder" scheme="https://huisebug.github.io/tags/kubebuilder/"/>
-    
-    <category term="kubernetes" scheme="https://huisebug.github.io/tags/kubernetes/"/>
-    
-    <category term="logstash" scheme="https://huisebug.github.io/tags/logstash/"/>
-    
-    <category term="filebeat" scheme="https://huisebug.github.io/tags/filebeat/"/>
-    
-    <category term="kafka-cluster" scheme="https://huisebug.github.io/tags/kafka-cluster/"/>
-    
-    <category term="kafka" scheme="https://huisebug.github.io/tags/kafka/"/>
-    
-    <category term="zookeeper-cluster" scheme="https://huisebug.github.io/tags/zookeeper-cluster/"/>
-    
-    <category term="elasticsearch-cluster" scheme="https://huisebug.github.io/tags/elasticsearch-cluster/"/>
     
   </entry>
   
@@ -341,6 +302,45 @@
     <category term="kubebuilder" scheme="https://huisebug.github.io/tags/kubebuilder/"/>
     
     <category term="kubernetes" scheme="https://huisebug.github.io/tags/kubernetes/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>logfile-operator:服务日志系统收集多方案</title>
+    <link href="https://huisebug.github.io/2022/12/09/logfile-operator/"/>
+    <id>https://huisebug.github.io/2022/12/09/logfile-operator/</id>
+    <published>2022-12-09T03:04:02.000Z</published>
+    <updated>2022-12-09T03:04:02.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>为kubernetes集群中部署服务提供多日志收集服务，快速接入多种部署方案的日志系统</p><span id="more"></span><h1 id="需求场景"><a href="#需求场景" class="headerlink" title="需求场景"></a>需求场景</h1><ul><li><p>   当pod中有多个容器时，需要对pod中的容器进行日志收集</p></li><li><p>   研发人员需要快速对服务进行日志收集后在kibana中集中查看</p></li></ul><h1 id="功能描述"><a href="#功能描述" class="headerlink" title="功能描述"></a>功能描述</h1><ul><li>  利用kubernetes pod注入对运行的服务进行注入容器，注入的容器和原容器在pod annotations配置的日志文件所在目录进行卷挂载，注解中配置的日志文件进行卷挂载，例如：<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      annotations:</span><br><span class="line">        logfile.huisebug.org/log1: /var/log/nginx/*.log</span><br></pre></td></tr></table></figure></li><li>  提供六种日志收集部署方案</li></ul><ol><li><p> filebeat+elasticsearch+kibana</p></li><li><p> filebeat+elasticsearch-cluster+kibana</p></li><li><p> filebeat+logstash+elasticsearch+kibana</p></li><li><p> filebeat+logstash+elasticsearch-cluster+kibana</p></li><li><p> filebeat+kafka+logstash+elasticsearch+kibana</p></li><li><p> filebeat+kafka-cluster+logstash+elasticsearch-cluster+kibana</p></li></ol><p>版本信息：<br>filebeat：8.5.0<br>logstash：8.5.0<br>kafka：3.3<br>zookeeper：3.8<br>elasticsearch：8.5.0<br>kibana：8.5.0</p><p>注意：elasticsearch集群这里采用的https集群</p><ul><li>  git项目首页提供的num的6个yaml文件对应了六种方案</li></ul><h1 id="部署命令（按顺序执行）"><a href="#部署命令（按顺序执行）" class="headerlink" title="部署命令（按顺序执行）"></a>部署命令（按顺序执行）</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f cert-manager.yaml</span><br><span class="line">kubectl apply -f deploy.yaml</span><br><span class="line">kubectl apply -f num数字.yaml</span><br></pre></td></tr></table></figure><h1 id="项目地址"><a href="#项目地址" class="headerlink" title="项目地址"></a>项目地址</h1><p><a href="https://github.com/huisebug/logfile-operator.git">https://github.com/huisebug/logfile-operator.git</a></p>]]></content>
+    
+    
+    <summary type="html">&lt;p&gt;为kubernetes集群中部署服务提供多日志收集服务，快速接入多种部署方案的日志系统&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Kubernetes-Dev" scheme="https://huisebug.github.io/categories/Kubernetes-Dev/"/>
+    
+    
+    <category term="k8s" scheme="https://huisebug.github.io/tags/k8s/"/>
+    
+    <category term="elasticsearch" scheme="https://huisebug.github.io/tags/elasticsearch/"/>
+    
+    <category term="kubebuilder" scheme="https://huisebug.github.io/tags/kubebuilder/"/>
+    
+    <category term="kubernetes" scheme="https://huisebug.github.io/tags/kubernetes/"/>
+    
+    <category term="logstash" scheme="https://huisebug.github.io/tags/logstash/"/>
+    
+    <category term="filebeat" scheme="https://huisebug.github.io/tags/filebeat/"/>
+    
+    <category term="kafka-cluster" scheme="https://huisebug.github.io/tags/kafka-cluster/"/>
+    
+    <category term="kafka" scheme="https://huisebug.github.io/tags/kafka/"/>
+    
+    <category term="zookeeper-cluster" scheme="https://huisebug.github.io/tags/zookeeper-cluster/"/>
+    
+    <category term="elasticsearch-cluster" scheme="https://huisebug.github.io/tags/elasticsearch-cluster/"/>
     
   </entry>
   
