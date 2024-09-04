@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<!DOCTYPE mycat:schema SYSTEM "schema.dtd">
+<mycat:schema xmlns:mycat="http://io.mycat/">
+  <!--TESTDB表示mycat的逻辑数据库名称
+
+     当schema节点没有子节点table的时候，一定要有dataNode属性存在（指向mysql真实数据库）-->
+
+<!--
+<schema name="boxtest" checkSQLschema="false" sqlMaxLimit="100">
+      <table name="t_user" dataNode="dn2,dn1" type="global" />
+      <table name="ht_jy_login_log" primaryKey="ID" dataNode="dn1,dn2" />
+</schema>      
+-->
+  <!--指定master的数据库>                               
+
+<dataNode name="dn1" dataHost="192.168.3.144" database="ym" />                                   
+<dataNode name="dn2" dataHost="192.168.3.144" database="boxtest" /> -->
+
+ <!--在这一行参数里面,schema name定义了可以在MyCAT前端显示的逻辑数据库的名字,
+                checkSQLschema这个参数为False的时候,表明MyCAT会自动忽略掉表名前的数据库名,比如说mydatabase1.test1,会被当做test1;
+                sqlMaxLimit指定了SQL语句返回的行数限制; -->
+<schema name="box-db" checkSQLschema="false" sqlMaxLimit="100" dataNode="dn1">
+</schema>
+<schema name="box-db-jiangsu" checkSQLschema="false" sqlMaxLimit="100" dataNode="dn2">
+</schema>
+<schema name="box-db-two" checkSQLschema="false" sqlMaxLimit="100" dataNode="dn3">
+</schema>
+<schema name="boxtest" checkSQLschema="false" sqlMaxLimit="100" dataNode="dn4">
+</schema>
+<schema name="db_benefit" checkSQLschema="false" sqlMaxLimit="100" dataNode="dn5">
+</schema>
+<schema name="db_sportsman" checkSQLschema="false" sqlMaxLimit="100" dataNode="dn6">
+</schema>
+
+
+<dataNode name="dn1" dataHost="mysql5.7" database="box-db" />
+<dataNode name="dn2" dataHost="mysql5.7" database="box-db-jiangsu" />
+<dataNode name="dn3" dataHost="mysql5.7" database="box-db-two" />
+<dataNode name="dn4" dataHost="mysql5.7" database="boxtest" />
+<dataNode name="dn5" dataHost="mysql5.7" database="db_benefit" />
+<dataNode name="dn6" dataHost="mysql5.7" database="db_sportsman" />
+
+
+ <!--指定mastet的ip -->
+<dataHost name="mysql5.7" maxCon="2000" minCon="10" balance="3"
+
+         writeType="1" dbType="mysql" dbDriver="native" switchType="2"  slaveThreshold="100">
+
+    <!--表示mysql的心跳状态-->
+
+    <heartbeat>show slave status</heartbeat>
+
+       <!-- master负责写 -->       
+
+    <writeHost host="master" url="10.10.10.235:3309" user="root" password="password55">
+
+    <!--slave负责读-->                        
+
+    <readHost host="slave1" url="10.10.10.233:3309" user="root" password="password55">                        
+
+    </readHost>    
+     <readHost host="slave2" url="10.10.10.234:3309" user="root" password="password55">                        
+
+    </readHost>  	
+
+    </writeHost>                               
+
+        </dataHost>                                                                                   
+
+
+
+ </mycat:schema>       
