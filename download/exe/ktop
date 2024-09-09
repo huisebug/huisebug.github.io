@@ -1,0 +1,8 @@
+#!/bin/bash
+namespace=$1
+if [ "$namespace"x = ""x ]; then
+kubectl top node
+kubectl top pod --all-namespaces --containers
+else
+kubectl top pod -n $namespace --containers
+fi
