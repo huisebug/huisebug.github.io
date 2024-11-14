@@ -1,7 +1,17 @@
 #!/bin/bash
-pod=$1
-if [ "$pod"x = ""x ]; then
-kubectl get pod --all-namespaces -o wide
+
+kubeconfig=/etc/kubernetes/admin.conf
+
+if [ -e "$kubeconfig" ]; then
+    pod=$1
+    if [ "$pod"x = ""x ]; then
+    kubectl --kubeconfig=$kubeconfig get pod --all-namespaces -o wide
+    else
+    kubectl --kubeconfig=$kubeconfig get pod --all-namespaces -o wide | grep $pod
+    fi
 else
-kubectl get pod --all-namespaces -o wide | grep $pod
+    echo "$kubeconfig认证文件不存在"
 fi
+
+
+

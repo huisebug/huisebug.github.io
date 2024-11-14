@@ -1,7 +1,14 @@
 #!/bin/bash
-namespace=$1
-if [ "$namespace"x = ""x ]; then
-kubectl get svc --all-namespaces -o wide
+
+kubeconfig=/etc/kubernetes/admin.conf
+
+if [ -e "$kubeconfig" ]; then
+    svc=$1
+    if [ "$svc"x = ""x ]; then
+    kubectl --kubeconfig=$kubeconfig get svc --all-namespaces -o wide
+    else
+    kubectl --kubeconfig=$kubeconfig get svc --all-namespaces -o wide | grep $svc
+    fi
 else
-kubectl get svc -n $namespace -o wide
+    echo "$kubeconfig认证文件不存在"
 fi

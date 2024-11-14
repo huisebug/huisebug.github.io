@@ -1,8 +1,18 @@
 #!/bin/bash
-namespace=$1
-if [ "$namespace"x = ""x ]; then
-kubectl top node
-kubectl top pod --all-namespaces --containers
+
+kubeconfig=/etc/kubernetes/admin.conf
+
+if [ -e "$kubeconfig" ]; then
+	namespace=$1
+	if [ "$namespace"x = ""x ]; then
+	kubectl --kubeconfig=$kubeconfig top node
+	kubectl --kubeconfig=$kubeconfig top pod --all-namespaces --containers
+	else
+	kubectl --kubeconfig=$kubeconfig top pod -n $namespace --containers
+	fi
 else
-kubectl top pod -n $namespace --containers
+    echo "$kubeconfig认证文件不存在"
 fi
+
+
+
