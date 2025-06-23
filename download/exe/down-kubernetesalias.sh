@@ -10,7 +10,7 @@ else
 fi    
 
 # 默认容器镜像名称
-kubernetesalias_VERSION="v20250530"
+kubernetesalias_VERSION="v20250623"
 
 # 如果有参数传入，则使用传入的容器镜像名称；否则使用默认值
 if [ -n "$1" ]; then
