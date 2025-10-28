@@ -6,6 +6,8 @@ if [ -e "$kubeconfig" ]; then
     pod=$1
     if [ "$pod"x = ""x ]; then
     kubectl --kubeconfig=$kubeconfig get pod --all-namespaces -o wide
+	elif [ "$pod" = "norun" ]; then
+	kubectl --kubeconfig=$kubeconfig get pod --all-namespaces -o wide | grep -v "Running"
     else
     kubectl --kubeconfig=$kubeconfig get pod --all-namespaces -o wide | grep $pod
     fi
